@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sleepy Spider · 界面草图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF7EF; --bg-2:#FCE6E2; --dot:rgba(232,154,171,.20);
+  --ink:#6B4A55; --ink-soft:#AE8C96;
+  --gold-hi:#F7E6BF; --gold:#CFA563; --gold-deep:#AE8341;
+  --pink:#F3C3CD; --pink-2:#FCE7EC;
+  --pearl:#FFFFFF;
+  --card-hi:#FFFFFF; --card:#FFFBF4; --card-edge:#EBDCCD;
+  --heart:#DE5E7C; --spade:#4F3A50;
+  --tint-h:rgba(246,198,208,.55); --tint-s:rgba(208,192,222,.50);
+  --back-1:#F0B4C2; --back-2:#FADCE3;
+  --shadow:rgba(150,96,104,.18);
+  --glass:rgba(255,251,246,.80);
+  --outer:#F4E6DE;
+  --spark:.6;
+}
+:root[data-theme="night"]{
+  --bg:#251B28; --bg-2:#35263C; --dot:rgba(226,190,130,.10);
+  --ink:#F2E2D6; --ink-soft:#B59CAE;
+  --gold-hi:#F6DDAE; --gold:#E2BD80; --gold-deep:#B48D58;
+  --pink:#7E546C; --pink-2:#4C3552;
+  --pearl:#E6D8CB;
+  --card-hi:#F2E9DD; --card:#E9DDCE; --card-edge:#BFAA98;
+  --heart:#CC5675; --spade:#3D2C40;
+  --tint-h:rgba(222,150,170,.30); --tint-s:rgba(170,150,190,.30);
+  --back-1:#6A4260; --back-2:#8E5D7D;
+  --shadow:rgba(0,0,0,.40);
+  --glass:rgba(48,34,54,.82);
+  --outer:#19121B;
+  --spark:.95;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--outer);color:var(--ink);
+  font-family:"ZCOOL XiaoWei","Noto Serif SC","Songti SC",serif;
+  -webkit-tap-highlight-color:transparent;transition:background .6s;
+}
+
+/* ---------- 整个手机画面 ---------- */
+.app{
+  position:relative;width:100%;max-width:430px;margin:0 auto;min-height:100dvh;
+  display:flex;flex-direction:column;overflow:hidden;container-type:inline-size;
+  padding-top:env(safe-area-inset-top);
+  background:
+    radial-gradient(110% 55% at 0% 0%, var(--bg-2) 0%, transparent 62%),
+    radial-gradient(90% 45% at 100% 100%, var(--bg-2) 0%, transparent 62%),
+    radial-gradient(circle, var(--dot) 1.1px, transparent 1.6px) 0 0/16px 16px,
+    var(--bg);
+  transition:background .6s;
+  --cw:calc((100cqw - 16px - 36px) / 10);   /* 一张牌的宽度 */
+}
+@media (min-width:560px){
+  body{display:grid;place-items:center;padding:28px 0;
+    background:radial-gradient(circle at 30% 20%, var(--bg-2), var(--outer) 72%)}
+  .app{height:min(880px, calc(100dvh - 56px));min-height:0;border-radius:42px;
+    border:7px solid var(--pearl);
+    box-shadow:0 30px 80px -24px var(--shadow),0 0 0 1px var(--card-edge)}
+}
+
+/* 顶部蕾丝花边 */
+.lace{flex:none;height:12px;position:relative;z-index:2;
+  background:
+    radial-gradient(circle at 50% 3.5px, var(--pearl) 0 1.4px, transparent 1.9px) 0 0/12px 12px repeat-x,
+    radial-gradient(circle at 50% 0, var(--pink) 0 6px, transparent 6.5px) 0 0/12px 12px repeat-x}
+
+/* 背景里的星光和蕾丝垫 */
+.spark{position:absolute;width:11px;height:11px;color:var(--gold);z-index:0;pointer-events:none;
+  opacity:calc(var(--spark)*.5);animation:tw 3.4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:calc(var(--spark)*.15);transform:scale(.65)}50%{opacity:var(--spark);transform:scale(1)}}
+.doily{position:absolute;left:50%;top:66%;width:300px;transform:translate(-50%,-50%);
+  fill:none;stroke:var(--pink);stroke-width:1.2;opacity:.6;z-index:0;pointer-events:none}
+.doily .f{fill:var(--pink);stroke:none}
+
+/* ---------- 标题 ---------- */
+.brand{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding:12px 0 2px}
+.logo{font-family:"Great Vibes",cursive;font-size:36px;line-height:1.05;color:var(--ink);
+  text-shadow:0 1px 0 var(--pearl)}
+.logo .s{position:relative;display:inline-block}
+.logo .tiny-crown{position:absolute;left:0;top:-9px;width:17px;height:17px;transform:rotate(-16deg)}
+.sub{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.32em;color:var(--ink-soft);margin-top:1px}
+.sub i{width:22px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.sub i:last-child{transform:scaleX(-1)}
+.sub .pips{display:flex;gap:2px;letter-spacing:0}
+.sub .pips svg{width:10px;height:10px}
+
+/* ---------- 分数条 ---------- */
+.hud{position:relative;z-index:2;margin:14px 12px 0;padding:9px 6px 8px;border-radius:22px;
+  display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;
+  background:var(--glass);border:1px solid var(--card-edge);
+  box-shadow:0 8px 20px -12px var(--shadow), inset 0 1px 0 var(--pearl);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.hud-bow{position:absolute;left:50%;top:-12px;width:34px;transform:translateX(-50%)}
+.stat{text-align:center}
+.stat small{display:block;font-size:11px;letter-spacing:.2em;color:var(--ink-soft)}
+.stat b{font-family:"Playfair Display",serif;font-weight:700;font-size:21px;line-height:1.15;
+  font-variant-numeric:lining-nums tabular-nums}
+.sep{width:1px;height:28px;background:linear-gradient(transparent,var(--gold),transparent);opacity:.6}
+
+/* ---------- 收牌区 + 发牌堆 ---------- */
+.toprow{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;padding:14px 8px 12px}
+.found{display:flex;gap:3px;padding-top:calc(var(--cw)*.18)}
+.slot{width:calc(var(--cw)*.74);height:calc(var(--cw)*1.05);border-radius:6px;
+  border:1px dashed var(--gold);opacity:.5;background:rgba(255,255,255,.22);
+  display:grid;place-items:center}
+.slot::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--gold);opacity:.7}
+.slot.done{opacity:1;border:none;background:none}
+.slot.done::after{display:none}
+.mini{width:100%;height:100%;border-radius:6px;position:relative;
+  background:linear-gradient(180deg,var(--card-hi),var(--card));border:1px solid var(--card-edge);
+  box-shadow:0 1px 0 var(--card-edge),0 2px 0 var(--card),0 3px 0 var(--card-edge),0 4px 6px -2px var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.mini b{font-family:"Playfair Display",serif;font-size:calc(var(--cw)*.36);line-height:1}
+.mini svg{width:calc(var(--cw)*.24);height:calc(var(--cw)*.24)}
+
+.stock{position:relative;width:calc(var(--cw)*1.9);height:calc(var(--cw)*1.42)}
+.stock .card{top:0}
+.badge{position:absolute;right:-5px;bottom:-6px;z-index:5;min-width:18px;height:18px;padding:0 5px;
+  border-radius:9px;background:var(--gold);color:#fff;font-family:"Playfair Display",serif;
+  font-size:11px;font-weight:700;display:grid;place-items:center;border:1.5px solid var(--pearl);
+  box-shadow:0 2px 6px -1px var(--shadow)}
+
+/* ---------- 牌桌 ---------- */
+.tableau{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:repeat(10,var(--cw));
+  gap:4px;padding:0 8px;justify-content:center;align-content:start}
+.col{position:relative}
+
+.card{position:absolute;left:0;width:var(--cw);height:calc(var(--cw)*1.42);border-radius:calc(var(--cw)*.14)}
+.card.up{background:linear-gradient(180deg,var(--card-hi) 0%,var(--card) 70%);border:1px solid var(--card-edge);
+  box-shadow:0 1px 2px var(--shadow)}
+.card.down{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.30) 0 1.5px, transparent 1.5px 6px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.30) 0 1.5px, transparent 1.5px 6px),
+    linear-gradient(165deg,var(--back-2),var(--back-1));
+  border:1px solid var(--pearl);
+  box-shadow:inset 0 0 0 2px var(--back-1), inset 0 0 0 2.7px rgba(255,255,255,.75), 0 1px 2px var(--shadow)}
+.card.down .bow{position:absolute;left:50%;top:50%;width:78%;transform:translate(-50%,-50%)}
+
+.heart{color:var(--heart)} .spade{color:var(--spade)}
+.corner{position:absolute;top:calc(var(--cw)*.05);left:calc(var(--cw)*.08);right:calc(var(--cw)*.06);
+  display:flex;justify-content:space-between;align-items:flex-start;line-height:1}
+.rank{font-family:"Playfair Display",serif;font-weight:700;font-size:calc(var(--cw)*.44);
+  letter-spacing:-.03em;font-variant-numeric:lining-nums}
+.rank.ten{font-size:calc(var(--cw)*.39);letter-spacing:-.11em}
+.pip{width:calc(var(--cw)*.27);height:calc(var(--cw)*.27);margin-top:calc(var(--cw)*.05);flex:none}
+.big{position:absolute;left:50%;bottom:calc(var(--cw)*.13);transform:translateX(-50%);
+  width:calc(var(--cw)*.62);height:calc(var(--cw)*.62)}
+.big.ace{width:calc(var(--cw)*.72);height:calc(var(--cw)*.72)}
+.art{position:absolute;left:10%;right:10%;bottom:7%;height:58%;border-radius:calc(var(--cw)*.1);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.heart .art{background:radial-gradient(circle at 50% 42%, var(--tint-h), transparent 72%)}
+.spade .art{background:radial-gradient(circle at 50% 42%, var(--tint-s), transparent 72%)}
+.art .ico{width:68%;height:auto}
+.art .pip-s{width:26%;height:auto}
+
+/* 提示：会发光的那几张 */
+.card.hint{box-shadow:0 0 0 1.5px var(--gold),0 0 12px 2px rgba(214,174,108,.65);animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 1.5px var(--gold),0 0 3px 0 rgba(214,174,108,0)}}
+
+.empty{width:var(--cw);height:calc(var(--cw)*1.42);border-radius:calc(var(--cw)*.14);
+  border:1.2px dashed var(--gold);opacity:.6;background:rgba(255,255,255,.22);display:grid;place-items:center}
+.empty svg{width:58%;fill:none;stroke:var(--gold);stroke-width:1.3;stroke-linejoin:round}
+
+/* ---------- 底部按钮 ---------- */
+.toolbar{position:relative;z-index:3;margin:0 10px calc(12px + env(safe-area-inset-bottom));
+  display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:8px 4px 7px;border-radius:26px;
+  background:var(--glass);border:1px solid var(--card-edge);
+  box-shadow:0 10px 26px -12px var(--shadow), inset 0 1px 0 var(--pearl);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.tb{appearance:none;border:0;background:none;color:var(--ink);font:inherit;font-size:12px;letter-spacing:.12em;
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:2px 0;cursor:pointer;
+  transition:transform .15s}
+.tb:active{transform:scale(.92)}
+.tb .ic{display:grid;place-items:center;height:26px}
+.tb svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tb.primary .ic{width:50px;height:50px;margin-top:-26px;border-radius:50%;
+  background:radial-gradient(circle at 35% 28%, var(--pink-2), var(--pink) 72%);
+  border:2.5px solid var(--pearl);box-shadow:0 8px 16px -6px var(--shadow), 0 0 0 1px var(--card-edge)}
+.tb.primary svg{width:26px;height:26px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- 共用的金色渐变 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--gold-hi)"/>
+      <stop offset=".55" style="stop-color:var(--gold)"/>
+      <stop offset="1" style="stop-color:var(--gold-deep)"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="app" id="app">
+  <div class="lace"></div>
+
+  <header class="brand">
+    <div class="logo"><span class="s">S<svg class="tiny-crown" id="logoCrown" viewBox="0 0 24 24"></svg></span>leepy Spider</div>
+    <div class="sub"><i></i>双色<span class="pips" id="subPips"></span><i></i></div>
+  </header>
+
+  <section class="hud">
+    <svg class="hud-bow" id="hudBow" viewBox="0 0 40 26"></svg>
+    <div class="stat"><small>分数</small><b>512</b></div>
+    <div class="sep"></div>
+    <div class="stat"><small>用时</small><b>03:24</b></div>
+    <div class="sep"></div>
+    <div class="stat"><small>步数</small><b>37</b></div>
+  </section>
+
+  <section class="toprow">
+    <div class="found" id="found"></div>
+    <div class="stock" id="stock"></div>
+  </section>
+
+  <main class="tableau" id="tableau"></main>
+
+  <nav class="toolbar">
+    <button class="tb"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>设置</button>
+    <button class="tb"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4.5 19.5 14 10"/><path d="M16.5 3.5l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z"/><path d="M8 5v2M7 6h2M19 15v2M18 16h2"/></svg></span>提示</button>
+    <button class="tb primary"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4.5" y="5.5" width="10" height="14" rx="2" transform="rotate(-9 9.5 12.5)"/><rect x="9.5" y="4.5" width="10" height="14" rx="2" transform="rotate(9 14.5 11.5)"/><path d="M14.6 9.6l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z"/></svg></span>新游戏</button>
+    <button class="tb"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 6 4 11l5 5"/><path d="M4 11h10.5a5 5 0 0 1 0 10H11"/></svg></span>撤销</button>
+    <button class="tb" id="nightBtn"><span class="ic" id="nightIc"></span><span id="nightTxt">夜晚</span></button>
+  </nav>
+</div>
+
+<script>
+const SUIT = {
+  h:'<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>',
+  s:'<path d="M12 2C9 6 3 9.5 3 14c0 2.5 2 4.5 4.5 4.5 1.4 0 2.6-.6 3.4-1.5-.3 1.8-1 3.3-2.4 4.5h7c-1.4-1.2-2.1-2.7-2.4-4.5.8.9 2 1.5 3.4 1.5 2.5 0 4.5-2 4.5-4.5C21 9.5 15 6 12 2z"/>'
+};
+const GOLD = 'fill="url(#gold)" style="stroke:var(--gold-deep)" stroke-width=".8" stroke-linejoin="round"';
+const CROWN = `<path d="M3.5 17.5 2.5 8l5 4 4.5-7 4.5 7 5-4-1 9.5z" ${GOLD}/><rect x="3.5" y="18.6" width="17" height="2.2" rx="1.1" ${GOLD}/><circle cx="12" cy="4.4" r="1.4" fill="currentColor"/><circle cx="2.6" cy="7.4" r="1.1" fill="currentColor"/><circle cx="21.4" cy="7.4" r="1.1" fill="currentColor"/>`;
+const FACE = {
+  K: CROWN,
+  Q: `<path d="M3 18c2.5-1.6 5.6-2.4 9-2.4s6.5.8 9 2.4l-1.2-7.5-3.6 3L12 6.5l-4.2 7-3.6-3z" ${GOLD}/><circle cx="12" cy="4.8" r="1.6" fill="currentColor"/><circle cx="12" cy="13.4" r="1.3" fill="currentColor"/>`,
+  J: `<path d="M12 3l2.3 5.4 5.8.5-4.4 3.8 1.3 5.7L12 15.4 7 18.4l1.3-5.7L3.9 8.9l5.8-.5z" ${GOLD}/><circle cx="12" cy="11.4" r="1.6" fill="currentColor"/>`
+};
+const BOW = (fill) => `<g style="fill:${fill};stroke:var(--gold)" stroke-width=".9" stroke-linejoin="round">
+  <path d="M18.5 12.5 13 24l3.5-1.4 2.1 2.4 1.9-12z"/><path d="M21.5 12.5 27 24l-3.5-1.4-2.1 2.4-1.9-12z"/>
+  <path d="M20 11C15 3 5 1 3.5 6.5 2 12 11 15 20 11z"/><path d="M20 11c5-8 15-10 16.5-4.5C38 12 29 15 20 11z"/>
+  <ellipse cx="20" cy="11.3" rx="3.2" ry="3.6"/></g>`;
+const SPARKLE = '<path d="M12 0c.8 6 5.2 10.4 12 12-6.8 1.6-11.2 6-12 12-.8-6-5.2-10.4-12-12C6.8 10.4 11.2 6 12 0z"/>';
+
+const pip = (s, cls = 'pip') => `<svg class="${cls}" viewBox="0 0 24 24" fill="currentColor">${SUIT[s]}</svg>`;
+
+function faceUp(r, s) {
+  let h = `<div class="corner"><span class="rank${r === '10' ? ' ten' : ''}">${r}</span>${pip(s)}</div>`;
+  if (FACE[r]) h += `<div class="art"><svg class="ico" viewBox="0 0 24 24">${FACE[r]}</svg>${pip(s, 'pip-s')}</div>`;
+  else h += `<svg class="big${r === 'A' ? ' ace' : ''}" viewBox="0 0 24 24" fill="currentColor">${SUIT[s]}</svg>`;
+  return h;
+}
+
+/* 一局打到一半的样子：down = 背面朝上几张，up = 翻开的牌 */
+const COLS = [
+  { down: 3, up: [['K','h'],['Q','h'],['J','h'],['10','h'],['9','h']] },
+  { down: 4, up: [['7','s']] },
+  { down: 2, up: [['9','s'],['8','s'],['7','s'],['6','s']] },
+  { down: 4, up: [['Q','s'],['J','h']] },
+  { down: 2, up: [['5','h'],['4','h'],['3','h']], hint: true },
+  { down: 3, up: [['A','s']] },
+  { down: 3, up: [['10','s'],['9','h']] },
+  { down: 3, up: [['8','h'],['7','h'],['6','h']] },
+  { down: 3, up: [['J','s'],['10','s']] },
+  { down: 0, up: [] }
+];
+const DOWN_GAP = .2, UP_GAP = .56;
+
+const tab = document.getElementById('tableau');
+COLS.forEach(c => {
+  const col = document.createElement('div');
+  col.className = 'col';
+  let y = 0, html = '';
+  if (!c.down && !c.up.length) html = `<div class="empty"><svg viewBox="0 0 24 24"><path d="M3.5 17.5 2.5 8l5 4 4.5-7 4.5 7 5-4-1 9.5z"/></svg></div>`;
+  for (let i = 0; i < c.down; i++) {
+    html += `<div class="card down" style="top:calc(var(--cw)*${y.toFixed(2)})"></div>`;
+    y += DOWN_GAP;
+  }
+  c.up.forEach(([r, s]) => {
+    html += `<div class="card up ${s === 'h' ? 'heart' : 'spade'}${c.hint ? ' hint' : ''}" style="top:calc(var(--cw)*${y.toFixed(2)})">${faceUp(r, s)}</div>`;
+    y += UP_GAP;
+  });
+  col.innerHTML = html;
+  tab.appendChild(col);
+});
+
+/* 收牌区：8 个位置，已经收齐 1 组 */
+document.getElementById('found').innerHTML =
+  `<div class="slot done"><div class="mini heart"><b>K</b>${pip('h', '')}</div></div>` +
+  '<div class="slot"></div>'.repeat(7);
+
+/* 发牌堆：还能发 4 次 */
+let stock = '';
+for (let i = 0; i < 4; i++) {
+  stock += `<div class="card down" style="left:calc(var(--cw)*${(i * .3).toFixed(1)})">${i === 3 ? `<svg class="bow" viewBox="0 0 40 26">${BOW('rgba(255,255,255,.9)')}</svg>` : ''}</div>`;
+}
+document.getElementById('stock').innerHTML = stock + '<span class="badge">4</span>';
+
+/* 小装饰 */
+document.getElementById('logoCrown').innerHTML = CROWN.replaceAll('currentColor', 'var(--heart)');
+document.getElementById('subPips').innerHTML = `<span class="spade">${pip('s', '')}</span><span class="heart">${pip('h', '')}</span>`;
+document.getElementById('hudBow').innerHTML = BOW('var(--pink)');
+
+const app = document.getElementById('app');
+[[7,10,0],[90,7,1.2],[12,47,2.1],[93,40,.6],[48,74,1.6],[18,84,.3],[82,79,2.6],[62,27,1]].forEach(([x, y, d]) => {
+  app.insertAdjacentHTML('beforeend',
+    `<svg class="spark" viewBox="0 0 24 24" fill="currentColor" style="left:${x}%;top:${y}%;animation-delay:${d}s">${SPARKLE}</svg>`);
+});
+
+let d = '<svg class="doily" viewBox="-150 -150 300 300" aria-hidden="true">';
+for (let i = 0; i < 32; i++) { const a = i / 32 * Math.PI * 2; d += `<circle cx="${(Math.cos(a) * 128).toFixed(1)}" cy="${(Math.sin(a) * 128).toFixed(1)}" r="14"/>`; }
+d += '<circle r="118"/><circle r="104" stroke-dasharray="2 5"/>';
+for (let i = 0; i < 16; i++) d += `<ellipse rx="10" ry="32" transform="rotate(${i * 22.5}) translate(0 -64)"/>`;
+for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; d += `<circle class="f" cx="${(Math.cos(a) * 92).toFixed(1)}" cy="${(Math.sin(a) * 92).toFixed(1)}" r="2.5"/>`; }
+d += '<circle r="26"/><circle r="12"/></svg>';
+app.insertAdjacentHTML('afterbegin', d);
+
+/* 夜晚模式（草图里唯一能点的按钮） */
+const MOON = '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+const SUN = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>';
+const nightIc = document.getElementById('nightIc'), nightTxt = document.getElementById('nightTxt');
+nightIc.innerHTML = MOON;
+document.getElementById('nightBtn').onclick = () => {
+  const root = document.documentElement, isNight = root.dataset.theme === 'night';
+  if (isNight) delete root.dataset.theme; else root.dataset.theme = 'night';
+  nightIc.innerHTML = isNight ? MOON : SUN;
+  nightTxt.textContent = isNight ? '夜晚' : '白天';
+};
+</script>
+</body>
+</html>
