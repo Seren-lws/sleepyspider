@@ -1,5 +1,6 @@
 // 进度和设置都存在手机本地，不用账号
 import { deserialize, serialize, type Difficulty, type GameState, type SavedGame } from './game/engine'
+import { emptyProgress, type Progress } from './game/progress'
 
 export type ThemePref = 'day' | 'night' | 'auto'
 
@@ -7,12 +8,15 @@ export interface Prefs {
   theme: ThemePref
   tapToMove: boolean
   difficulty: Difficulty
+  back: string
+  bg: string
 }
 
-export const defaultPrefs: Prefs = { theme: 'day', tapToMove: true, difficulty: 2 }
+export const defaultPrefs: Prefs = { theme: 'day', tapToMove: true, difficulty: 2, back: 'pink', bg: 'cream' }
 
 const SAVE_KEY = 'sleepyspider:save:v1'
 const PREFS_KEY = 'sleepyspider:prefs:v1'
+const PROGRESS_KEY = 'sleepyspider:progress:v1'
 const MAX_HISTORY = 400
 
 interface SaveFile {
@@ -58,3 +62,9 @@ export function saveGame(game: GameState, history: GameState[], elapsed: number)
 
 export const loadPrefs = (): Prefs => ({ ...defaultPrefs, ...read<Partial<Prefs>>(PREFS_KEY) })
 export const savePrefs = (p: Prefs) => write(PREFS_KEY, p)
+
+export function loadProgress(now: number): Progress {
+  const p = read<Progress>(PROGRESS_KEY)
+  return p?.daily && p.stats ? p : emptyProgress(now)
+}
+export const saveProgress = (p: Progress) => write(PROGRESS_KEY, p)

@@ -3,22 +3,25 @@ import {
   bestTarget, canMove, collect, deal, dealsLeft, findCompleted, hasEmptyCol, hints, isRun, isWon,
   moveCards, newGame, undoTo, SETS, type Card, type Difficulty, type GameState, type Hint,
 } from './game/engine'
-import { loadGame, loadPrefs, saveGame, savePrefs, type Prefs } from './storage'
+import type { Item, ItemKind } from './game/catalog'
+import {
+  beginGame, collectSets, ensureDay, levelFor, markStarted, rewardText, syncGame, winGame,
+  type Progress, type Reward,
+} from './game/progress'
+import { loadGame, loadPrefs, loadProgress, saveGame, savePrefs, saveProgress, type Prefs } from './storage'
 import { CardBack, CardView } from './ui/CardView'
 import { Decor } from './ui/Decor'
-import { EASE, Flipper, flyToSlot, shake } from './ui/flip'
+import { EASE, Flipper, flyCandy, flyToSlot, shake } from './ui/flip'
+import { fmtTime } from './ui/format'
+import { GiftOverlay } from './ui/Gift'
+import { GrowthSheet, type GrowthTab } from './ui/Growth'
 import {
-  Bow, CROWN_PATH, Crown, GoldDefs, IconCards, IconHint, IconMoon, IconSettings, IconSun, IconUndo, Pip,
+  Bow, CROWN_PATH, Crown, GoldDefs, IconCards, IconHint, IconMoon, IconSettings, IconSun, IconUndo, Konpeito, Pip,
 } from './ui/icons'
 import { NewGameSheet, SettingsSheet } from './ui/Sheets'
 import { WinOverlay } from './ui/WinOverlay'
 
-const fmtTime = (sec: number) => {
-  const s = Math.floor(sec)
-  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60
-  const mmss = `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`
-  return h ? `${h}:${mmss}` : mmss
-}
+type LevelReward = Extract<Reward, { kind: 'level' }>
 
 const isNightHour = (d = new Date()) => d.getHours() >= 21 || d.getHours() < 6
 
@@ -67,10 +70,14 @@ interface Drag {
 }
 
 function boot() {
+  const now = Date.now()
   const prefs = loadPrefs()
   const saved = loadGame()
-  if (saved && !isWon(saved.game)) return { prefs, ...saved }
-  return { prefs, game: newGame(prefs.difficulty), history: [] as GameState[], elapsed: 0 }
+  const g = saved && !isWon(saved.game)
+    ? saved
+    : { game: newGame(prefs.difficulty), history: [] as GameState[], elapsed: 0 }
+  const progress = syncGame(ensureDay(loadProgress(now), now), g.game.seed, g.game.difficulty)
+  return { prefs, progress, ...g }
 }
 
 export default function App() {
@@ -79,12 +86,21 @@ export default function App() {
   const [game, setGame] = useState<GameState>(init.game)
   const [lay, setLay] = useState({ cw: 0, avail: 0 })
   const [hint, setHint] = useState<Hint | null>(null)
-  const [toast, setToast] = useState<{ text: string; id: number } | null>(null)
-  const [sheet, setSheet] = useState<'new' | 'settings' | null>(null)
+  const [toasts, setToasts] = useState<{ text: string; id: number; candy?: boolean }[]>([])
+  const [sheet, setSheet] = useState<'new' | 'settings' | 'growth' | null>(null)
+  const [growthTab, setGrowthTab] = useState<GrowthTab>('tasks')
   const [win, setWin] = useState(false)
+  const [winRewards, setWinRewards] = useState<Reward[]>([])
+  const [gifts, setGifts] = useState<LevelReward[]>([])
+  const [progress, setProgress] = useState<Progress>(init.progress)
   const [fresh, setFresh] = useState(-1)
   const [, setMinute] = useState(0)
 
+  const progressRef = useRef(init.progress)
+  const carry = useRef<Reward[]>([]) // 最后一串收齐时拿到的奖励，留到赢的面板里一起显示
+  const winGifts = useRef<LevelReward[]>([])
+  const nightRef = useRef(false)
+  const candyRef = useRef<HTMLButtonElement>(null)
   const gameRef = useRef(init.game)
   const history = useRef<GameState[]>(init.history)
   const elapsed = useRef(init.elapsed)
@@ -95,7 +111,7 @@ export default function App() {
   const lastGame = useRef<GameState | null>(null)
   const spawnFrom = useRef<Element | null>(null)
   const hintCursor = useRef({ moves: -1, i: 0 })
-  const timers = useRef<{ hint?: number; toast?: number }>({})
+  const timers = useRef<{ hint?: number }>({})
 
   const appRef = useRef<HTMLDivElement>(null)
   const tabRef = useRef<HTMLElement>(null)
@@ -135,6 +151,7 @@ export default function App() {
     const t = window.setInterval(() => setMinute((m) => m + 1), 60_000)
     return () => window.clearInterval(t)
   }, [prefs.theme])
+  useLayoutEffect(() => { nightRef.current = night }, [night])
   useEffect(() => {
     const root = document.documentElement
     if (night) root.dataset.theme = 'night'
@@ -168,10 +185,65 @@ export default function App() {
     saveGame(n, history.current, elapsed.current)
   }
 
-  function say(text: string) {
-    window.clearTimeout(timers.current.toast)
-    setToast({ text, id: Date.now() })
-    timers.current.toast = window.setTimeout(() => setToast(null), 2600)
+  /* ---------- 小提示条：一条一条排队出来 ---------- */
+  function say(text: string, candy = false) {
+    setToasts((q) => (q.length && q[q.length - 1].text === text ? q : [...q, { text, id: Date.now() + Math.random(), candy }]))
+  }
+  useEffect(() => {
+    if (!toasts.length) return
+    const t = window.setTimeout(() => setToasts((q) => q.slice(1)), 2600)
+    return () => window.clearTimeout(t)
+  }, [toasts])
+
+  /* ---------- 金平糖、任务、成就、升级 ---------- */
+  function applyProgress(p: Progress) {
+    progressRef.current = p
+    setProgress(p)
+    saveProgress(p)
+  }
+
+  /** 玩的过程中拿到的奖励：糖飞到右上角，任务和成就弹提示，升级就排队拆礼物 */
+  function showRewards(rewards: Reward[], slot: Element | null) {
+    const lv: LevelReward[] = []
+    for (const r of rewards) {
+      if (r.kind === 'set') {
+        if (appRef.current) flyCandy(appRef.current, slot, candyRef.current, r.amount, 600)
+      } else if (r.kind === 'level') lv.push(r)
+      else say(rewardText(r), true)
+    }
+    if (lv.length) window.setTimeout(() => setGifts((q) => [...q, ...lv]), 1300)
+  }
+
+  function onWin(n: GameState) {
+    busy.current = true
+    const res = winGame(progressRef.current, {
+      difficulty: n.difficulty, time: elapsed.current, score: n.score, undos: n.undos, hints: n.hints, night: nightRef.current,
+    }, Date.now())
+    applyProgress(res.p)
+    const all = [...carry.current, ...res.rewards]
+    carry.current = []
+    setWinRewards(all)
+    winGifts.current = all.filter((r): r is LevelReward => r.kind === 'level')
+    window.setTimeout(() => { if (isWon(gameRef.current)) setWin(true) }, 1100)
+  }
+
+  /** 关掉胜利画面以后，再拆这一局升级的礼物 */
+  function closeWin(again: boolean) {
+    const lv = winGifts.current
+    winGifts.current = []
+    if (again) startGame(prefsRef.current.difficulty)
+    else setWin(false)
+    if (lv.length) setGifts((q) => [...q, ...lv])
+  }
+
+  function equip(kind: ItemKind, id: string) {
+    updatePrefs(kind === 'back' ? { back: id } : { bg: id })
+  }
+
+  function openGrowth(tab: GrowthTab) {
+    applyProgress(ensureDay(progressRef.current, Date.now()))
+    setGrowthTab(tab)
+    setSheet('growth')
   }
 
   function clearHint() {
@@ -182,10 +254,7 @@ export default function App() {
   /** 走完一步后：有凑齐的整串就收走，全收完就赢 */
   function settle(n: GameState) {
     if (!findCompleted(n).length) {
-      if (isWon(n)) {
-        busy.current = true
-        window.setTimeout(() => { if (isWon(gameRef.current)) setWin(true) }, 1100)
-      }
+      if (isWon(n)) onWin(n)
       return
     }
     busy.current = true
@@ -199,6 +268,14 @@ export default function App() {
       const next = collect(cur, c)
       setFresh(next.done.length - 1)
       commit(next)
+      const res = collectSets(progressRef.current, next.done.length, Date.now())
+      applyProgress(res.p)
+      const slot = app?.querySelector(`[data-slot="${next.done.length - 1}"]`) ?? null
+      if (isWon(next)) {
+        // 最后一串：糖照样飞，其余奖励留到赢的面板里
+        showRewards(res.rewards.filter((r) => r.kind === 'set'), slot)
+        carry.current = res.rewards.filter((r) => r.kind !== 'set')
+      } else showRewards(res.rewards, slot)
       settle(next)
     }, 320)
   }
@@ -206,6 +283,7 @@ export default function App() {
   function doMove(from: number, idx: number, to: number) {
     const g = gameRef.current
     if (!canMove(g, from, idx, to)) return
+    if (g.moves === 0) applyProgress(markStarted(progressRef.current))
     history.current.push(g)
     clearHint()
     const n = moveCards(g, from, idx, to)
@@ -221,6 +299,7 @@ export default function App() {
       say('有空列的时候不能发牌哦，先放一张牌进去吧')
       return
     }
+    if (g.moves === 0) applyProgress(markStarted(progressRef.current))
     history.current.push(g)
     clearHint()
     const n = deal(g)
@@ -267,8 +346,11 @@ export default function App() {
     setWin(false)
     setFresh(-1)
     setSheet(null)
+    carry.current = []
     updatePrefs({ difficulty: d })
-    commit(newGame(d, seed))
+    const g = newGame(d, seed)
+    applyProgress(beginGame(progressRef.current, g.seed, d))
+    commit(g)
   }
 
   /* ---------- 拖牌 / 点牌 ---------- */
@@ -376,12 +458,18 @@ export default function App() {
   const left = dealsLeft(game)
 
   return (
-    <div className="app" ref={appRef} style={{ '--cw': `${cw}px` } as CSSProperties}>
+    <div className="app" ref={appRef} data-back={prefs.back} data-bg={prefs.bg} style={{ '--cw': `${cw}px` } as CSSProperties}>
       <GoldDefs />
       <Decor />
       <div className="lace" />
 
       <header className="brand">
+        <button className="pill lv" onClick={() => openGrowth('tasks')} aria-label="等级和每日任务">
+          <Crown className="pill-crown" jewel="var(--heart)" />Lv.{levelFor(progress.candy)}
+        </button>
+        <button className="pill candy" ref={candyRef} onClick={() => openGrowth('tasks')} aria-label="金平糖">
+          <Konpeito className="k" />{progress.candy}
+        </button>
         <div className="logo">
           <span className="s">S<Crown className="tiny-crown" jewel="var(--heart)" /></span>leepy Spider
         </div>
@@ -423,7 +511,7 @@ export default function App() {
           aria-label={`发牌，还能发 ${left} 次`}
         >
           {Array.from({ length: left }, (_, i) => (
-            <CardBack key={i} style={{ left: cw * 0.3 * i }} bow={i === left - 1} stockTop={i === left - 1} />
+            <CardBack key={i} style={{ left: cw * 0.3 * i }} emblem={i === left - 1 ? prefs.back : undefined} stockTop={i === left - 1} />
           ))}
           {left > 0 && <span className="badge">{left}</span>}
         </div>
@@ -461,7 +549,11 @@ export default function App() {
         </button>
       </nav>
 
-      {toast && <div className="toast" key={toast.id}>{toast.text}</div>}
+      {toasts[0] && (
+        <div className="toast" key={toasts[0].id}>
+          {toasts[0].candy && <Konpeito className="k" />}{toasts[0].text}
+        </div>
+      )}
 
       {sheet === 'new' && (
         <NewGameSheet
@@ -473,7 +565,10 @@ export default function App() {
         />
       )}
       {sheet === 'settings' && (
-        <SettingsSheet prefs={prefs} onChange={updatePrefs} onClose={() => setSheet(null)} />
+        <SettingsSheet prefs={prefs} onChange={updatePrefs} onDress={() => openGrowth('dress')} onClose={() => setSheet(null)} />
+      )}
+      {sheet === 'growth' && (
+        <GrowthSheet p={progress} prefs={prefs} initial={growthTab} onEquip={equip} onClose={() => setSheet(null)} />
       )}
       {win && (
         <WinOverlay
@@ -481,8 +576,19 @@ export default function App() {
           score={game.score}
           time={fmtTime(elapsed.current)}
           moves={game.moves}
-          onAgain={() => startGame(prefs.difficulty)}
-          onClose={() => setWin(false)}
+          rewards={winRewards}
+          onAgain={() => closeWin(true)}
+          onClose={() => closeWin(false)}
+        />
+      )}
+      {!win && gifts[0] && (
+        <GiftOverlay
+          key={gifts[0].level}
+          level={gifts[0].level}
+          item={gifts[0].item}
+          bonus={gifts[0].bonus}
+          onEquip={(item: Item) => { equip(item.kind, item.id); setGifts((q) => q.slice(1)) }}
+          onClose={() => setGifts((q) => q.slice(1))}
         />
       )}
     </div>

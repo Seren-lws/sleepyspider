@@ -13,6 +13,7 @@
   --veil: rgba(255, 246, 240, .74);
   --outer: #F4E6DE;
   --spark: .6;
+  --dim: rgba(0, 0, 0, 0);
   --ease: cubic-bezier(.22, .8, .24, 1);
 }
 :root[data-theme="night"] {
@@ -30,6 +31,7 @@
   --veil: rgba(28, 19, 32, .74);
   --outer: #19121B;
   --spark: .95;
+  --dim: rgba(22, 14, 28, .58);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0 }
@@ -54,11 +56,7 @@ button { font: inherit; color: inherit }
   position: relative; width: 100%; max-width: 480px; margin: 0 auto; height: 100%;
   display: flex; flex-direction: column; overflow: hidden;
   padding-top: env(safe-area-inset-top);
-  background:
-    radial-gradient(110% 55% at 0% 0%, var(--bg-2) 0%, transparent 62%),
-    radial-gradient(90% 45% at 100% 100%, var(--bg-2) 0%, transparent 62%),
-    radial-gradient(circle, var(--dot) 1.1px, transparent 1.6px) 0 0/16px 16px,
-    var(--bg);
+  background: var(--app-bg);
   transition: background .6s;
 }
 @media (min-width: 560px) and (min-height: 640px) {
@@ -94,10 +92,10 @@ button { font: inherit; color: inherit }
 
 /* ---------- 标题 ---------- */
 .brand { position: relative; z-index: 2; flex: none; display: flex; flex-direction: column; align-items: center; padding: 10px 0 0 }
-.logo { font-family: "Great Vibes", cursive; font-size: 34px; line-height: 1.05; color: var(--ink); text-shadow: 0 1px 0 var(--pearl) }
+.logo { font-family: "Great Vibes", cursive; font-size: clamp(28px, 8.6vw, 34px); line-height: 1.05; color: var(--brand-ink, var(--ink)); text-shadow: 0 1px 0 var(--brand-glow, var(--pearl)) }
 .logo .s { position: relative; display: inline-block }
 .logo .tiny-crown { position: absolute; left: 0; top: -9px; width: 17px; height: 17px; transform: rotate(-16deg) }
-.sub { display: flex; align-items: center; gap: 7px; font-size: 12px; letter-spacing: .32em; color: var(--ink-soft) }
+.sub { display: flex; align-items: center; gap: 7px; font-size: 12px; letter-spacing: .32em; color: var(--brand-ink-soft, var(--ink-soft)) }
 .sub i { width: 22px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)) }
 .sub i:last-child { transform: scaleX(-1) }
 .sub .pips { display: flex; gap: 2px; letter-spacing: 0 }
@@ -173,14 +171,13 @@ button { font: inherit; color: inherit }
   border: 1px solid var(--card-edge); box-shadow: 0 1px 2px var(--shadow); cursor: grab;
 }
 .card.down {
-  background:
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, .30) 0 1.5px, transparent 1.5px 6px),
-    repeating-linear-gradient(-45deg, rgba(255, 255, 255, .30) 0 1.5px, transparent 1.5px 6px),
-    linear-gradient(165deg, var(--back-2), var(--back-1));
-  border: 1px solid var(--pearl);
-  box-shadow: inset 0 0 0 2px var(--back-1), inset 0 0 0 2.7px rgba(255, 255, 255, .75), 0 1px 2px var(--shadow);
+  background: var(--back-img);
+  border: 1px solid var(--back-edge, var(--pearl));
+  box-shadow: inset 0 0 0 2px var(--back-frame), inset 0 0 0 2.7px rgba(255, 255, 255, .75), 0 1px 2px var(--shadow);
+  filter: var(--back-dim, none);
 }
-.card.down .bow { position: absolute; left: 50%; top: 50%; width: 78%; transform: translate(-50%, -50%) }
+.card.down .bow, .card.down .emblem { position: absolute; left: 50%; top: 50%; width: 74%; transform: translate(-50%, -50%) }
+.card.down .emblem { width: 70% }
 .card[data-dragging] { z-index: 100; cursor: grabbing; box-shadow: 0 8px 18px -6px var(--shadow) }
 .card.ghost { z-index: 60; pointer-events: none }
 

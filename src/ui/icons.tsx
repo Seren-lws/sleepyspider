@@ -117,3 +117,44 @@ export const IconSun = () => (
     <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
   </Line>
 )
+
+/* ---- 金平糖：一颗圆圆的、带小疙瘩的星星糖 ---- */
+const BUMPS = Array.from({ length: 8 }, (_, i) => {
+  const a = (i / 8) * Math.PI * 2 - Math.PI / 2
+  return [12 + Math.cos(a) * 6.4, 12 + Math.sin(a) * 6.4] as const
+})
+export const CANDY_COLORS = ['#F6A8BC', '#F7D58A', '#C9B6E8', '#A9DCC8']
+
+export function Konpeito({ className, color = CANDY_COLORS[0] }: { className?: string; color?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <g fill={color} stroke="rgba(120,80,90,.25)" strokeWidth=".5">
+        {BUMPS.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="3.4" />)}
+        <circle cx="12" cy="12" r="6.8" stroke="none" />
+      </g>
+      <circle cx="9.6" cy="9.2" r="1.9" fill="#fff" opacity=".8" />
+    </svg>
+  )
+}
+
+export const IconLock = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" className="lock">
+    <rect x="5.5" y="10.5" width="13" height="10" rx="2.5" />
+    <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" />
+  </svg>
+)
+
+export const IconCheck = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" className="check"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+)
+
+/** 成就小奖章：拿到了是金色，没拿到是灰灰的轮廓 */
+export function Medal({ on }: { on: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={on ? 'medal on' : 'medal'}>
+      <path d="M8 2.5h3l1.8 5.5H9.8zM16 2.5h-3l-1.8 5.5h3z" className="ribbon" />
+      <circle cx="12" cy="15" r="6.5" className="coin" />
+      <path d="M12 11.3l1.1 2.3 2.5.3-1.8 1.7.5 2.5-2.3-1.2-2.3 1.2.5-2.5-1.8-1.7 2.5-.3z" className="star" />
+    </svg>
+  )
+}

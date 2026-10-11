@@ -1,0 +1,257 @@
+/* ================= 背景 ================= */
+[data-bg="cream"] {
+  --app-bg:
+    radial-gradient(110% 55% at 0% 0%, var(--bg-2) 0%, transparent 62%),
+    radial-gradient(90% 45% at 100% 100%, var(--bg-2) 0%, transparent 62%),
+    radial-gradient(circle, var(--dot) 1.1px, transparent 1.6px) 0 0/16px 16px,
+    var(--bg);
+}
+[data-bg="lavender"] {
+  --app-bg:
+    linear-gradient(var(--dim), var(--dim)),
+    radial-gradient(55% 35% at 50% 64%, rgba(255, 255, 255, .5), transparent 70%),
+    radial-gradient(70% 45% at 0% 0%, #EADFF8 0%, transparent 62%),
+    radial-gradient(70% 45% at 100% 100%, #D5C2EE 0%, transparent 62%),
+    radial-gradient(circle, rgba(255, 255, 255, .6) 1px, transparent 1.6px) 0 0/18px 18px,
+    linear-gradient(180deg, #F3ECFB, #E2D4F3);
+}
+[data-bg="starry"] {
+  --app-bg:
+    radial-gradient(circle at 20% 30%, rgba(255, 244, 214, .9) 0 1px, transparent 1.6px) 0 0/97px 89px,
+    radial-gradient(circle at 70% 60%, rgba(255, 244, 214, .7) 0 .8px, transparent 1.3px) 0 0/61px 53px,
+    radial-gradient(circle at 40% 80%, rgba(255, 214, 230, .8) 0 1.2px, transparent 1.8px) 0 0/131px 117px,
+    radial-gradient(60% 35% at 85% 8%, rgba(190, 160, 240, .35), transparent 70%),
+    radial-gradient(70% 40% at 10% 95%, rgba(240, 160, 190, .25), transparent 70%),
+    linear-gradient(180deg, #27224A, #3B3168 55%, #57427A);
+  --brand-ink: #F6E9DD;
+  --brand-ink-soft: #CDBBD6;
+  --brand-glow: transparent;
+}
+[data-bg="sakura"] {
+  --app-bg:
+    linear-gradient(var(--dim), var(--dim)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cdefs%3E%3Cpath id='p' d='M0 6C-4 3-5-2-2-5L0-3.5 2-5C5-2 4 3 0 6Z'/%3E%3C/defs%3E%3Cg fill='%23F4AFC2' opacity='.7'%3E%3Cuse href='%23p' transform='translate(30 28) rotate(20) scale(1.5)'/%3E%3Cuse href='%23p' transform='translate(112 52) rotate(-35) scale(1.1)'/%3E%3Cuse href='%23p' transform='translate(72 104) rotate(60) scale(1.7)'/%3E%3C/g%3E%3Cg fill='%23FAD0DB' opacity='.85'%3E%3Cuse href='%23p' transform='translate(132 126) rotate(-10) scale(1.2)'/%3E%3Cuse href='%23p' transform='translate(18 122) rotate(110) scale(1.3)'/%3E%3Cuse href='%23p' transform='translate(84 18) rotate(160) scale(1)'/%3E%3C/g%3E%3C/svg%3E") 0 0/150px 150px,
+    radial-gradient(60% 40% at 50% 60%, rgba(255, 255, 255, .55), transparent 70%),
+    linear-gradient(180deg, #FFF3F5, #FCDCE5);
+}
+[data-bg="cloud"] {
+  --app-bg:
+    linear-gradient(var(--dim), var(--dim)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='220'%3E%3Cdefs%3E%3Cg id='c'%3E%3Cellipse cx='0' cy='0' rx='18' ry='14'/%3E%3Cellipse cx='22' cy='-8' rx='22' ry='19'/%3E%3Cellipse cx='46' cy='1' rx='17' ry='13'/%3E%3Crect x='-6' y='-2' width='60' height='15' rx='7.5'/%3E%3C/g%3E%3C/defs%3E%3Cg fill='%23fff' opacity='.85'%3E%3Cuse href='%23c' x='30' y='50'/%3E%3Cuse href='%23c' transform='translate(165 150) scale(.7)'/%3E%3C/g%3E%3Cg fill='%23fff' opacity='.5'%3E%3Cuse href='%23c' transform='translate(190 40) scale(.45)'/%3E%3C/g%3E%3C/svg%3E") 0 0/260px 220px,
+    linear-gradient(180deg, #E4EEFB 0%, #F1ECF9 55%, #FCEEF3 100%);
+}
+
+/* ================= 牌背 ================= */
+[data-back] { --back-dim: none }
+[data-back="pink"] {
+  --back-img:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, .30) 0 1.5px, transparent 1.5px 6px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, .30) 0 1.5px, transparent 1.5px 6px),
+    linear-gradient(165deg, var(--back-2), var(--back-1));
+  --back-frame: var(--back-1);
+}
+[data-back="cat"] {
+  --back-img:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cg fill='%23fff' opacity='.85'%3E%3Cellipse cx='7' cy='8.8' rx='2.2' ry='1.8'/%3E%3Ccircle cx='4.5' cy='6' r='1'/%3E%3Ccircle cx='7' cy='5' r='1'/%3E%3Ccircle cx='9.5' cy='6' r='1'/%3E%3C/g%3E%3C/svg%3E") 0 0/14px 14px,
+    linear-gradient(165deg, #F3EEFA, #DED3EF);
+  --back-frame: #D2C4E6;
+}
+[data-back="strawberry"] {
+  --back-img:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cdefs%3E%3Cg id='s'%3E%3Cpath d='M5 9.5C2.8 8.2 1.6 6.6 1.6 5 1.6 3.6 3.1 3 5 3s3.4.6 3.4 2C8.4 6.6 7.2 8.2 5 9.5z' fill='%23F48DA6'/%3E%3Cpath d='M5 3.4 3.4 2.4l1 .1L5 1.4l.6 1.1 1-.1z' fill='%2387C9A0'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23s'/%3E%3Cuse href='%23s' x='10' y='10'/%3E%3C/svg%3E") 0 0/20px 20px,
+    linear-gradient(165deg, #FFF0F4, #FFD5E0);
+  --back-frame: #F5B0C3;
+}
+[data-back="pearl"] {
+  --back-img:
+    radial-gradient(circle at 50% 50%, #fff 0 1.4px, #E6D7C2 1.9px, transparent 2.3px) 0 0/8px 8px,
+    linear-gradient(165deg, #FFFDF8, #F1E6D6);
+  --back-frame: #E1CFB6;
+}
+[data-back="moon"] {
+  --back-img:
+    radial-gradient(circle, rgba(255, 240, 205, .95) 0 .7px, transparent 1.1px) 0 0/9px 11px,
+    radial-gradient(circle, rgba(255, 240, 205, .6) 0 .6px, transparent 1px) 4px 5px/13px 9px,
+    linear-gradient(165deg, #5A4F8F, #36305F);
+  --back-frame: #2E2952;
+  --back-edge: #E2BD80;
+}
+:root[data-theme="night"] :is([data-back="cat"], [data-back="strawberry"], [data-back="pearl"]) {
+  --back-dim: brightness(.78) saturate(.92);
+}
+
+/* ================= 标题旁的等级和糖罐 ================= */
+.pill {
+  position: absolute; top: 14px; z-index: 3; display: flex; align-items: center; gap: 3px;
+  height: 26px; padding: 0 9px 0 6px; border-radius: 13px; cursor: pointer;
+  border: 1px solid var(--card-edge); background: var(--glass); box-shadow: 0 4px 10px -6px var(--shadow);
+  font-family: "Playfair Display", serif; font-weight: 700; font-size: 13px; color: var(--ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.pill.lv { left: 12px }
+.pill.candy { right: 12px }
+.pill .k, .pill-crown { width: 16px; height: 16px; flex: none }
+
+.candy-fly {
+  position: absolute; z-index: 75; pointer-events: none; display: flex; align-items: center; gap: 2px;
+  font-family: "Playfair Display", serif; font-weight: 700; font-size: 13px; color: var(--gold-deep);
+  text-shadow: 0 1px 0 var(--pearl);
+}
+.candy-fly svg { width: 22px; height: 22px }
+.toast .k { width: 16px; height: 16px; vertical-align: -3px; margin-right: 5px }
+
+/* ================= 成长面板 ================= */
+.sheet.tall { max-height: 88% }
+.tab-body {
+  min-height: 0; flex: 1 1 auto; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain;
+  margin: 0 -4px; padding: 2px 4px;
+}
+
+.level-card { padding: 12px 14px; border-radius: 20px; background: linear-gradient(135deg, var(--pink-2), var(--glass)); border: 1px solid var(--card-edge) }
+.level-top { display: flex; justify-content: space-between; align-items: center }
+.level-top b { font-family: "Playfair Display", serif; font-size: 24px; line-height: 1 }
+.level-candy { display: flex; align-items: center; gap: 4px; font-family: "Playfair Display", serif; font-weight: 700; font-variant-numeric: lining-nums }
+.level-candy .k { width: 18px; height: 18px }
+.bar { height: 8px; border-radius: 4px; background: var(--card-edge); margin: 9px 0 7px; overflow: hidden }
+.bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--pink-deep), var(--gold)); transition: width .6s var(--ease) }
+.level-next { font-size: 12px; color: var(--ink-soft); line-height: 1.5 }
+
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px; border-radius: 16px; background: var(--glass); border: 1px solid var(--card-edge) }
+.tabs button {
+  appearance: none; border: 0; background: none; padding: 8px 0; border-radius: 12px; cursor: pointer;
+  font-size: 13px; letter-spacing: .08em; color: var(--ink-soft); transition: all .2s;
+}
+.tabs button.on { background: linear-gradient(180deg, var(--pink-2), var(--pink)); color: var(--ink); box-shadow: 0 4px 10px -6px var(--shadow) }
+
+.list { list-style: none; display: flex; flex-direction: column; gap: 8px }
+.list li {
+  display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 16px;
+  background: var(--glass); border: 1px solid var(--card-edge); font-size: 14px;
+}
+.list li.done { background: linear-gradient(135deg, var(--pink-2), var(--glass)) }
+.list .grow { flex: 1; min-width: 0 }
+.list small { display: block; font-size: 11px; color: var(--ink-soft); margin-top: 2px }
+.list small.count { display: inline; font-family: "Playfair Display", serif; font-variant-numeric: lining-nums }
+.tick { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px dashed var(--gold); display: grid; place-items: center }
+li.done .tick { border-style: solid; background: var(--gold) }
+.check { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round }
+.gain {
+  flex: none; display: flex; align-items: center; gap: 2px; font-family: "Playfair Display", serif;
+  font-weight: 700; font-size: 12px; color: var(--gold-deep); font-variant-numeric: lining-nums;
+}
+.gain .k { width: 15px; height: 15px }
+li.done .gain { opacity: .5 }
+.list.ach li.locked { opacity: .6 }
+.medal { flex: none; width: 30px; height: 30px }
+.medal .ribbon { fill: var(--card-edge) }
+.medal .coin { fill: none; stroke: var(--card-edge); stroke-width: 1.3 }
+.medal .star { fill: var(--card-edge) }
+.medal.on .ribbon { fill: var(--pink-deep) }
+.medal.on .coin { fill: url(#gold); stroke: var(--gold-deep); stroke-width: .8 }
+.medal.on .star { fill: #fff }
+.note.center { text-align: center; margin: 10px 0 4px }
+
+.stats {
+  width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; overflow: hidden;
+  background: var(--glass); border: 1px solid var(--card-edge); border-radius: 16px;
+}
+.stats th { font-weight: 400; font-size: 12px; color: var(--ink-soft); letter-spacing: .15em; padding: 10px 6px 6px }
+.stats td {
+  padding: 8px 6px; text-align: center; border-top: 1px solid var(--card-edge);
+  font-family: "Playfair Display", "ZCOOL XiaoWei", serif; font-variant-numeric: lining-nums tabular-nums;
+}
+.stats td:first-child { text-align: left; padding-left: 14px; font-family: "ZCOOL XiaoWei", serif; color: var(--ink-soft) }
+.totals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px }
+.totals div { padding: 10px; border-radius: 16px; background: var(--glass); border: 1px solid var(--card-edge); text-align: center }
+.totals small { display: block; font-size: 11px; color: var(--ink-soft); letter-spacing: .15em }
+.totals b {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 18px;
+  font-family: "Playfair Display", "ZCOOL XiaoWei", serif; font-variant-numeric: lining-nums;
+}
+.totals .k { width: 18px; height: 18px }
+
+.dress-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 10px; margin: 8px 0 14px }
+.dress {
+  appearance: none; position: relative; cursor: pointer; padding: 10px 4px 8px; border-radius: 16px;
+  background: var(--glass); border: 1.5px solid var(--card-edge);
+  display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all .2s;
+}
+.dress.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(214, 174, 108, .35) }
+.dress.locked { cursor: default }
+.dress.locked .back-preview, .dress.locked .bg-swatch { filter: grayscale(.6) opacity(.5) }
+.dress-name { font-size: 12px }
+.dress-lock {
+  position: absolute; top: 6px; right: 6px; display: flex; align-items: center; gap: 1px;
+  padding: 1px 5px 1px 3px; border-radius: 8px; background: var(--glass);
+  font-family: "Playfair Display", serif; font-size: 10px; font-weight: 700; color: var(--ink-soft);
+}
+.lock { width: 11px; height: 11px; fill: var(--ink-soft); stroke: var(--ink-soft); stroke-width: 1.6 }
+.lock path { fill: none }
+.back-preview { --cw: 44px; position: relative; width: 44px; height: calc(44px * 1.42); flex: none }
+.back-preview .card { top: 0 }
+.bg-swatch {
+  width: 52px; height: 72px; border-radius: 10px; background: var(--app-bg);
+  border: 1px solid var(--card-edge); box-shadow: 0 2px 6px -3px var(--shadow);
+}
+
+/* ================= 升级礼物 ================= */
+.gift {
+  position: absolute; inset: 0; z-index: 95; background: var(--veil);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  animation: fade .5s ease both;
+}
+.gift-stage { position: relative; width: 160px; height: 210px }
+.gift-box {
+  position: absolute; left: 20px; bottom: 0; width: 120px; height: 120px; overflow: visible;
+  animation: gift-drop .7s var(--ease) both, gift-wobble .5s ease-in-out .9s 2;
+}
+.gift-body { fill: var(--pink); stroke: var(--pearl); stroke-width: 2 }
+.gift-lid-top { fill: var(--pink-deep); stroke: var(--pearl); stroke-width: 2 }
+.gift-lid { transform-box: fill-box; transform-origin: 15% 100%; animation: gift-lid .7s var(--ease) 2.1s both }
+@keyframes gift-drop { from { transform: translateY(-70px); opacity: 0 } }
+@keyframes gift-wobble { 25% { transform: rotate(-5deg) } 75% { transform: rotate(5deg) } }
+@keyframes gift-lid { to { transform: translate(-20px, -50px) rotate(-24deg); opacity: 0 } }
+.gift-item {
+  position: absolute; left: 50%; top: 92px; z-index: 2; display: grid; place-items: center;
+  animation: gift-emerge 1s var(--ease) 2.4s both;
+}
+@keyframes gift-emerge {
+  from { transform: translate(-50%, 30px) scale(.3); opacity: 0 }
+  to { transform: translate(-50%, -78px) scale(1.3); opacity: 1 }
+}
+.gift-spark {
+  position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; color: var(--gold);
+  animation: gift-spark 1.4s ease-out 2.8s both;
+}
+@keyframes gift-spark {
+  0% { transform: translate(-50%, -50%) rotate(var(--a)) translateY(0) scale(.3); opacity: 0 }
+  30% { opacity: 1 }
+  100% { transform: translate(-50%, -50%) rotate(var(--a)) translateY(-58px) scale(1); opacity: 0 }
+}
+.candy-pile { position: relative; width: 72px; height: 54px }
+.candy-pile .k { position: absolute; width: 24px; height: 24px }
+.candy-pile .k0 { left: 4px; top: 28px }
+.candy-pile .k1 { left: 24px; top: 30px }
+.candy-pile .k2 { left: 44px; top: 28px }
+.candy-pile .k3 { left: 14px; top: 12px }
+.candy-pile .k4 { left: 34px; top: 13px }
+.candy-pile .k5 { left: 24px; top: -2px }
+.candy-pile .k6 { left: -6px; top: 8px; transform: scale(.7) }
+.candy-pile .k7 { left: 54px; top: 6px; transform: scale(.7) }
+.gift-panel {
+  width: calc(100% - 48px); padding: 18px 20px 10px; border-radius: 26px; text-align: center;
+  background: var(--glass); border: 1px solid var(--card-edge); box-shadow: 0 20px 40px -16px var(--shadow);
+  display: flex; flex-direction: column; gap: 8px; animation: rise-in .7s var(--ease) 3s both;
+}
+.gift-title { font-size: 22px; letter-spacing: .2em }
+.gift-sub { font-size: 14px; color: var(--ink-soft); letter-spacing: .05em }
+.gift.skip, .gift.skip * { animation-delay: 0s !important; animation-duration: .01s !important }
+
+/* ================= 赢了的奖励清单 ================= */
+.win-rewards {
+  list-style: none; display: flex; flex-direction: column; gap: 4px; margin: 2px 0 4px;
+  font-size: 13px; text-align: left; max-height: 30vh; overflow-y: auto;
+}
+.win-rewards li { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 12px; background: var(--pink-2) }
+.win-rewards .k { width: 16px; height: 16px; flex: none }
+.win-rewards li.lv { justify-content: center; border: 1px solid var(--gold) }

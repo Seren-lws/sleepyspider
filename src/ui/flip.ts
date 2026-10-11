@@ -121,3 +121,30 @@ export function shake(els: HTMLElement[]) {
     )
   }
 }
+
+/** 收齐一串后：一颗金平糖从格子里蹦出来，飞到右上角的糖罐上 */
+export function flyCandy(app: HTMLElement, from: Element | null, to: Element | null, amount: number, delay = 0) {
+  if (!from || !to || reduced()) return
+  const a = app.getBoundingClientRect(), f = from.getBoundingClientRect(), t = to.getBoundingClientRect()
+  const node = document.createElement('div')
+  node.className = 'candy-fly'
+  node.innerHTML = `${to.querySelector('svg')?.outerHTML ?? ''}<b>+${amount}</b>`
+  node.style.left = `${f.left + f.width / 2 - a.left}px`
+  node.style.top = `${f.top + f.height / 2 - a.top}px`
+  app.appendChild(node)
+  const dx = t.left + t.width / 2 - (f.left + f.width / 2)
+  const dy = t.top + t.height / 2 - (f.top + f.height / 2)
+  const anim = node.animate(
+    [
+      { transform: 'translate(-50%,-50%) scale(.2)', opacity: 0 },
+      { transform: 'translate(-50%,-110%) scale(1.15)', opacity: 1, offset: 0.3 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.55)`, opacity: 0.9 },
+    ],
+    { duration: 950, delay, easing: 'cubic-bezier(.5,0,.3,1)', fill: 'both' },
+  )
+  anim.onfinish = () => {
+    node.remove()
+    to.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }], { duration: 320, easing: EASE })
+  }
+  anim.oncancel = () => node.remove()
+}

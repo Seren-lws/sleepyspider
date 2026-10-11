@@ -1,12 +1,14 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import type { Suit } from '../game/engine'
-import { SPARKLE_PATH } from './icons'
+import { rewardText, type Reward } from '../game/progress'
+import { Konpeito, SPARKLE_PATH } from './icons'
 
 interface Props {
   done: Suit[]
   score: number
   time: string
   moves: number
+  rewards: Reward[]
   onAgain: () => void
   onClose: () => void
 }
@@ -17,7 +19,7 @@ interface Layout { from: Spot[]; to: Spot[]; w: number; h: number }
 const STAR_COLORS = ['var(--gold)', 'var(--pink-deep)', 'var(--gold-hi)', 'var(--heart)']
 
 /** 赢了：收好的 8 串牌飘到中间，一串一串化成星星，慢慢飘上去 */
-export function WinOverlay({ done, score, time, moves, onAgain, onClose }: Props) {
+export function WinOverlay({ done, score, time, moves, rewards, onAgain, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const [lay, setLay] = useState<Layout | null>(null)
   const [skip, setSkip] = useState(false)
@@ -108,6 +110,16 @@ export function WinOverlay({ done, score, time, moves, onAgain, onClose }: Props
           <div><small>用时</small><b>{time}</b></div>
           <div><small>步数</small><b>{moves}</b></div>
         </div>
+        {rewards.some((r) => r.kind !== 'set') && (
+          <ul className="win-rewards">
+            {rewards.filter((r) => r.kind !== 'set' && r.kind !== 'level').map((r, i) => (
+              <li key={i}><Konpeito className="k" />{rewardText(r)}</li>
+            ))}
+            {rewards.filter((r) => r.kind === 'level').slice(-1).map((r) => (
+              <li key="lv" className="lv">🎁 {rewardText(r)}，有一份礼物等你拆</li>
+            ))}
+          </ul>
+        )}
         <button className="btn primary" onClick={onAgain}>再来一局</button>
         <button className="btn text" onClick={onClose}>看看牌桌</button>
       </div>

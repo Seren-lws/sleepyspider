@@ -1,6 +1,7 @@
 import { memo, type CSSProperties } from 'react'
 import type { Card } from '../game/engine'
-import { Bow, FaceArt, Pip } from './icons'
+import { FaceArt, Pip } from './icons'
+import { BackEmblem } from './outfits'
 
 const LABEL = ['', 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 
@@ -48,10 +49,10 @@ export const CardView = memo(function CardView({ card, col, idx, top, extra }: P
   )
 })
 
-export function CardBack({ style, bow, stockTop }: { style?: CSSProperties; bow?: boolean; stockTop?: boolean }) {
+export function CardBack({ style, emblem, stockTop }: { style?: CSSProperties; emblem?: string; stockTop?: boolean }) {
   return (
     <div className="card down" style={style} data-stock-top={stockTop ? 1 : undefined}>
-      {bow && <Bow className="bow" fill="rgba(255,255,255,.9)" />}
+      {emblem && <BackEmblem back={emblem} />}
     </div>
   )
 }

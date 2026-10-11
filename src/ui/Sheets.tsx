@@ -3,10 +3,10 @@ import type { Difficulty } from '../game/engine'
 import type { Prefs, ThemePref } from '../storage'
 import { Pip } from './icons'
 
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function Sheet({ title, onClose, children, tall }: { title: string; onClose: () => void; children: ReactNode; tall?: boolean }) {
   return (
     <div className="backdrop" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={title}>
+      <div className={tall ? 'sheet tall' : 'sheet'} onClick={(e) => e.stopPropagation()} role="dialog" aria-label={title}>
         <h2>{title}</h2>
         {children}
       </div>
@@ -43,9 +43,10 @@ export function NewGameSheet({ initial, canRestart, onStart, onRestart, onClose 
 
 const THEMES: [ThemePref, string][] = [['day', '白天'], ['night', '夜晚'], ['auto', '跟着时间']]
 
-export function SettingsSheet({ prefs, onChange, onClose }: {
+export function SettingsSheet({ prefs, onChange, onDress, onClose }: {
   prefs: Prefs
   onChange: (p: Partial<Prefs>) => void
+  onDress: () => void
   onClose: () => void
 }) {
   return (
@@ -66,7 +67,7 @@ export function SettingsSheet({ prefs, onChange, onClose }: {
         <i className="switch" aria-hidden="true" />
       </label>
 
-      <p className="note soon">金平糖、每日任务、换装扮，下一步就来 ✦</p>
+      <button className="btn ghost" onClick={onDress}>换牌背和背景</button>
       <button className="btn text" onClick={onClose}>好了</button>
       <p className="ver">Sleepy Spider · v0.1</p>
     </Sheet>
