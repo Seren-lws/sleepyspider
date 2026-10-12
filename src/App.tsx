@@ -334,7 +334,7 @@ export default function App() {
     if (busy.current) return
     const g = gameRef.current
     if (!dealsLeft(g)) return
-    if (hasEmptyCol(g)) {
+    if (hasEmptyCol(g) && !prefsRef.current.dealWithEmpty) {
       say('有空列的时候不能发牌哦，先放一张牌进去吧')
       return
     }
@@ -361,9 +361,10 @@ export default function App() {
   function onHint() {
     if (busy.current) return
     const g = gameRef.current
-    const list = hints(g)
+    const allowEmpty = prefsRef.current.dealWithEmpty
+    const list = hints(g, allowEmpty)
     if (!list.length) {
-      say(dealsLeft(g) && hasEmptyCol(g) ? '先挪一张牌到空列里，才能发牌哦' : '好像走不动了……可以撤销几步，或者开新的一局')
+      say(dealsLeft(g) && hasEmptyCol(g) && !allowEmpty ? '先挪一张牌到空列里，才能发牌哦' : '好像走不动了……可以撤销几步，或者开新的一局')
       return
     }
     if (hintCursor.current.moves !== g.moves) hintCursor.current = { moves: g.moves, i: 0 }

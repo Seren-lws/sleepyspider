@@ -89,6 +89,16 @@ describe('发牌堆', () => {
     expect(n.stock).toHaveLength(0)
     expect(n.cols.every((c) => c.length === 2 && c[1].up)).toBe(true)
   })
+
+  it('宽松规则：有空列也能发，空列里落进一张翻开的牌', () => {
+    const stock = Array.from({ length: 10 }, (_, i) => makeCard(i, 2))
+    const g = board([[], ...Array(9).fill([up(13)])], { stock })
+    expect(canDeal(g, true)).toBe(true)
+    expect(hints(g, true)).toContainEqual({ deal: true })
+    const n = deal(g)
+    expect(n.cols[0]).toHaveLength(1)
+    expect(n.cols[0][0].up).toBe(true)
+  })
 })
 
 describe('提示和点一下自动移', () => {

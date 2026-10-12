@@ -132,7 +132,8 @@ export function collect(s: GameState, c: number): GameState {
 
 export const dealsLeft = (s: GameState) => Math.floor(s.stock.length / COLS)
 export const hasEmptyCol = (s: GameState) => s.cols.some((c) => c.length === 0)
-export const canDeal = (s: GameState) => dealsLeft(s) > 0 && !hasEmptyCol(s)
+/** allowEmpty：有空列也让发（宽松规则）；标准规则要先把空列填上 */
+export const canDeal = (s: GameState, allowEmpty = false) => dealsLeft(s) > 0 && (allowEmpty || !hasEmptyCol(s))
 
 export function deal(s: GameState): GameState {
   const stock = s.stock.slice(0, -COLS)
@@ -171,7 +172,7 @@ export function bestTarget(s: GameState, from: number, idx: number): number | nu
 }
 
 /** 提示：按"有多值得走"排序的所有走法，最后才建议发牌 */
-export function hints(s: GameState): Hint[] {
+export function hints(s: GameState, allowEmpty = false): Hint[] {
   const scored: { h: Hint; sc: number }[] = []
   s.cols.forEach((col, from) => {
     const rs = runStart(col)
@@ -209,7 +210,7 @@ export function hints(s: GameState): Hint[] {
   })
   scored.sort((a, b) => b.sc - a.sc)
   const out: Hint[] = scored.map((x) => x.h)
-  if (canDeal(s)) out.push({ deal: true })
+  if (canDeal(s, allowEmpty)) out.push({ deal: true })
   return out
 }
 

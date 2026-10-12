@@ -103,6 +103,13 @@ export function SettingsSheet({ prefs, onChange, onDress, onExport, onRestore, o
         <i className="switch" aria-hidden="true" />
       </label>
 
+      <label className="switch-row">
+        <span>有空列也能发牌</span>
+        <input type="checkbox" checked={prefs.dealWithEmpty} onChange={(e) => onChange({ dealWithEmpty: e.target.checked })} />
+        <i className="switch" aria-hidden="true" />
+      </label>
+      <p className="note">关掉就是标准规则：要先把空列填上才能发牌。</p>
+
       <button className="btn ghost" onClick={onDress}>换牌背和背景</button>
 
       <div className="row-label">存档</div>
