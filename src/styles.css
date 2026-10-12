@@ -5,7 +5,7 @@
   --pink: #F3C3CD; --pink-2: #FCE7EC; --pink-deep: #E99AAE;
   --pearl: #FFFFFF;
   --card-hi: #FFFFFF; --card: #FFFBF4; --card-edge: #EBDCCD;
-  --heart: #DE5E7C; --spade: #4F3A50;
+  --heart: #D2486C; --spade: #3B2840;
   --tint-h: rgba(246, 198, 208, .55); --tint-s: rgba(208, 192, 222, .50);
   --back-1: #F0B4C2; --back-2: #FADCE3;
   --shadow: rgba(150, 96, 104, .18);
@@ -13,6 +13,7 @@
   --veil: rgba(255, 246, 240, .74);
   --outer: #F4E6DE;
   --spark: .6;
+  --card-shade: rgba(96, 66, 84, .22);
   --dim: rgba(0, 0, 0, 0);
   --ease: cubic-bezier(.22, .8, .24, 1);
 }
@@ -23,7 +24,7 @@
   --pink: #7E546C; --pink-2: #4C3552; --pink-deep: #C2849E;
   --pearl: #E6D8CB;
   --card-hi: #F2E9DD; --card: #E9DDCE; --card-edge: #BFAA98;
-  --heart: #CC5675; --spade: #3D2C40;
+  --heart: #BF4067; --spade: #2F1F34;
   --tint-h: rgba(222, 150, 170, .30); --tint-s: rgba(170, 150, 190, .30);
   --back-1: #6A4260; --back-2: #8E5D7D;
   --shadow: rgba(0, 0, 0, .40);
@@ -31,6 +32,7 @@
   --veil: rgba(28, 19, 32, .74);
   --outer: #19121B;
   --spark: .95;
+  --card-shade: rgba(14, 8, 18, .36);
   --dim: rgba(22, 14, 28, .58);
 }
 
@@ -134,7 +136,7 @@ button { font: inherit; color: inherit }
   position: absolute; inset: 0;
   box-shadow: 0 1px 0 var(--card-edge), 0 2px 0 var(--card), 0 3px 0 var(--card-edge), 0 4px 6px -2px var(--shadow);
 }
-.mini b, .win-mini b { font-family: "Playfair Display", serif; font-size: calc(var(--cw) * .36); line-height: 1 }
+.mini b, .win-mini b { font-family: "Nunito", "Arial Rounded MT Bold", sans-serif; font-weight: 900; font-size: calc(var(--cw) * .4); line-height: 1 }
 .mini svg { width: calc(var(--cw) * .24); height: calc(var(--cw) * .24) }
 .slot.fresh .mini { animation: pop .5s .62s var(--ease) both }
 @keyframes pop {
@@ -178,6 +180,12 @@ button { font: inherit; color: inherit }
 }
 .card.down .bow, .card.down .emblem { position: absolute; left: 50%; top: 50%; width: 74%; transform: translate(-50%, -50%) }
 .card.down .emblem { width: 70% }
+/* 暂时动不了的翻开牌：盖一层淡灰，能动的那串就显得亮 */
+.card.up::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
+  background: var(--card-shade); opacity: 0; transition: opacity .3s;
+}
+.card.up.dim::after { opacity: 1 }
 .card[data-dragging] { z-index: 100; cursor: grabbing; box-shadow: 0 8px 18px -6px var(--shadow) }
 .card.ghost { z-index: 60; pointer-events: none }
 
@@ -187,8 +195,8 @@ button { font: inherit; color: inherit }
   position: absolute; top: calc(var(--cw) * .05); left: calc(var(--cw) * .08); right: calc(var(--cw) * .06);
   display: flex; justify-content: space-between; align-items: flex-start; line-height: 1; pointer-events: none;
 }
-.rank { font-family: "Playfair Display", serif; font-weight: 700; font-size: calc(var(--cw) * .44); letter-spacing: -.03em; font-variant-numeric: lining-nums }
-.rank.ten { font-size: calc(var(--cw) * .39); letter-spacing: -.11em }
+.rank { font-family: "Nunito", "Arial Rounded MT Bold", sans-serif; font-weight: 900; font-size: calc(var(--cw) * .5); line-height: .9; letter-spacing: -.02em; font-variant-numeric: lining-nums }
+.rank.ten { font-size: calc(var(--cw) * .44); letter-spacing: -.06em }
 .pip { width: calc(var(--cw) * .27); height: calc(var(--cw) * .27); margin-top: calc(var(--cw) * .05); flex: none }
 .big {
   position: absolute; left: 50%; bottom: calc(var(--cw) * .13); transform: translateX(-50%);

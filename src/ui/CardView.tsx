@@ -30,11 +30,12 @@ interface Props {
   idx: number
   top: number
   extra?: string
+  dim?: boolean
 }
 
 /** 牌桌上的一张牌；data-* 给拖拽和动画认人用 */
-export const CardView = memo(function CardView({ card, col, idx, top, extra }: Props) {
-  const cls = card.up ? `card up ${card.suit === 'h' ? 'heart' : 'spade'}` : 'card down'
+export const CardView = memo(function CardView({ card, col, idx, top, extra, dim }: Props) {
+  const cls = card.up ? `card up ${card.suit === 'h' ? 'heart' : 'spade'}${dim ? ' dim' : ''}` : 'card down'
   return (
     <div
       className={extra ? `${cls} ${extra}` : cls}

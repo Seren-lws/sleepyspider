@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent } from 'react'
 import {
   bestTarget, canMove, collect, deal, dealsLeft, findCompleted, hasEmptyCol, hints, isRun, isWon,
-  moveCards, newGame, undoTo, SETS, type Card, type Difficulty, type GameState, type Hint,
+  moveCards, newGame, runStart, undoTo, SETS, type Card, type Difficulty, type GameState, type Hint,
 } from './game/engine'
 import type { Item, ItemKind } from './game/catalog'
 import {
@@ -28,13 +28,13 @@ const isNightHour = (d = new Date()) => d.getHours() >= 21 || d.getHours() < 6
 /** 每张牌在列里离顶端多远；牌太多放不下时自动挤紧一点 */
 function columnTops(col: Card[], cw: number, avail: number): number[] {
   const ch = cw * 1.42
-  let dg = cw * 0.2, ug = cw * 0.56
+  let dg = cw * 0.2, ug = cw * 0.62
   let d = 0
   while (d < col.length && !col[d].up) d++
   const u = col.length - d
   if (d * dg + Math.max(0, u - 1) * ug + ch > avail) {
     dg = Math.min(dg, cw * 0.12)
-    if (u > 1) ug = Math.max(cw * 0.26, Math.min(ug, (avail - ch - d * dg) / (u - 1)))
+    if (u > 1) ug = Math.max(cw * 0.3, Math.min(ug, (avail - ch - d * dg) / (u - 1)))
   }
   const tops: number[] = []
   let y = 0
@@ -520,6 +520,7 @@ export default function App() {
       <main className="tableau" ref={tabRef} onPointerDown={onPointerDown} onContextMenu={(e) => e.preventDefault()}>
         {cw > 0 && game.cols.map((col, c) => {
           const tops = columnTops(col, cw, lay.avail)
+          const rs = runStart(col) // 比这串更靠上的翻开牌暂时动不了，盖一层淡灰
           const isTo = hintMove?.to === c
           return (
             <div className="col" key={c}>
@@ -532,7 +533,7 @@ export default function App() {
                 let extra: string | undefined
                 if (hintMove && hintMove.from === c && i >= hintMove.idx) extra = 'hint'
                 else if (isTo && i === col.length - 1) extra = 'hint-to'
-                return <CardView key={card.id} card={card} col={c} idx={i} top={tops[i]} extra={extra} />
+                return <CardView key={card.id} card={card} col={c} idx={i} top={tops[i]} extra={extra} dim={card.up && i < rs} />
               })}
             </div>
           )
