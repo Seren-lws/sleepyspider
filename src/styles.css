@@ -248,7 +248,7 @@ button { font: inherit; color: inherit }
 
 /* ---------- 小提示条 ---------- */
 .toast {
-  position: absolute; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); z-index: 70;
+  position: absolute; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); z-index: 98;
   transform: translateX(-50%); max-width: calc(100% - 48px); width: max-content;
   padding: 9px 16px; border-radius: 18px; font-size: 13px; letter-spacing: .06em; text-align: center;
   background: var(--glass); border: 1px solid var(--card-edge); box-shadow: 0 10px 24px -10px var(--shadow);
@@ -270,11 +270,19 @@ button { font: inherit; color: inherit }
   position: relative; width: 100%; padding: 26px 20px calc(18px + env(safe-area-inset-bottom));
   background: var(--bg); border-radius: 28px 28px 0 0; box-shadow: 0 -12px 30px -12px var(--shadow);
   display: flex; flex-direction: column; gap: 12px; animation: rise .34s var(--ease) both;
+  max-height: 92%; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y;
 }
 .sheet::before {
-  content: ""; position: absolute; left: 24px; right: 24px; top: -6px; height: 12px;
-  background: radial-gradient(circle at 50% 50%, var(--pink) 0 5px, transparent 5.5px) 0 0/12px 12px repeat-x;
+  content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 6px;
+  background: radial-gradient(circle at 50% 0, var(--pink) 0 5px, transparent 5.5px) 0 0/12px 6px repeat-x;
 }
+.sheet > * { flex-shrink: 0 }
+.sheet > .tab-body { flex-shrink: 1 }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.backup-card { padding: 14px 16px; border-radius: 20px; background: linear-gradient(135deg, var(--pink-2), var(--glass)); border: 1px solid var(--card-edge); text-align: center }
+.backup-row { display: flex; justify-content: center; align-items: center; gap: 14px; margin-bottom: 4px }
+.backup-row b { font-family: "Playfair Display", serif; font-size: 24px }
+.backup-card small { font-size: 12px; color: var(--ink-soft) }
 @keyframes rise { from { transform: translateY(100%) } }
 .sheet h2 { font-weight: 400; font-size: 18px; letter-spacing: .3em; text-align: center; margin-bottom: 4px }
 .row-label { font-size: 13px; letter-spacing: .15em; color: var(--ink-soft) }

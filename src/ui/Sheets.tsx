@@ -1,7 +1,13 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import type { Difficulty } from '../game/engine'
-import type { Prefs, ThemePref } from '../storage'
-import { Pip } from './icons'
+import { levelFor } from '../game/progress'
+import { parseBackup, type Backup, type Prefs, type ThemePref } from '../storage'
+import { Konpeito, Pip } from './icons'
+
+const fmtDate = (t: number) => {
+  const d = new Date(t)
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+}
 
 export function Sheet({ title, onClose, children, tall }: { title: string; onClose: () => void; children: ReactNode; tall?: boolean }) {
   return (
@@ -43,12 +49,42 @@ export function NewGameSheet({ initial, canRestart, onStart, onRestart, onClose 
 
 const THEMES: [ThemePref, string][] = [['day', '白天'], ['night', '夜晚'], ['auto', '跟着时间']]
 
-export function SettingsSheet({ prefs, onChange, onDress, onClose }: {
+export function SettingsSheet({ prefs, onChange, onDress, onExport, onRestore, onError, onClose }: {
   prefs: Prefs
   onChange: (p: Partial<Prefs>) => void
   onDress: () => void
+  onExport: () => void
+  onRestore: (b: Backup) => void
+  onError: (text: string) => void
   onClose: () => void
 }) {
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [pending, setPending] = useState<Backup | null>(null)
+
+  async function pick(file: File | undefined) {
+    if (!file) return
+    const b = parseBackup(await file.text())
+    if (b) setPending(b)
+    else onError('这个文件好像不是 Sleepy Spider 的存档')
+  }
+
+  if (pending) {
+    return (
+      <Sheet title="导入存档" onClose={() => setPending(null)}>
+        <div className="backup-card">
+          <div className="backup-row">
+            <b>Lv.{levelFor(pending.progress.candy)}</b>
+            <span className="level-candy"><Konpeito className="k" />{pending.progress.candy}</span>
+          </div>
+          <small>这个存档是 {fmtDate(pending.at)} 导出的</small>
+        </div>
+        <p className="note center">要用这个存档覆盖现在的进度吗？现在的等级、金平糖和正在打的这一局都会换成存档里的。</p>
+        <button className="btn primary" onClick={() => onRestore(pending)}>覆盖</button>
+        <button className="btn text" onClick={() => setPending(null)}>算了</button>
+      </Sheet>
+    )
+  }
+
   return (
     <Sheet title="设置" onClose={onClose}>
       <div className="row-label">夜晚模式</div>
@@ -68,6 +104,21 @@ export function SettingsSheet({ prefs, onChange, onDress, onClose }: {
       </label>
 
       <button className="btn ghost" onClick={onDress}>换牌背和背景</button>
+
+      <div className="row-label">存档</div>
+      <div className="btn-row">
+        <button className="btn ghost" onClick={onExport}>导出存档</button>
+        <button className="btn ghost" onClick={() => fileRef.current?.click()}>导入存档</button>
+      </div>
+      <input
+        ref={fileRef} type="file" accept=".json,application/json,text/plain" hidden
+        onChange={(e) => { void pick(e.target.files?.[0]); e.target.value = '' }}
+      />
+      <p className="note">
+        进度只存在这台手机里。导出的小文件可以存到"文件"里，或者发给自己，换手机时导入就能接着玩。
+        {prefs.lastBackup ? ` 上次导出：${fmtDate(prefs.lastBackup)}` : ' 还没有导出过。'}
+      </p>
+
       <button className="btn text" onClick={onClose}>好了</button>
       <p className="ver">Sleepy Spider · v0.1</p>
     </Sheet>

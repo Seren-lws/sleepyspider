@@ -8,7 +8,10 @@ import {
   beginGame, collectSets, ensureDay, levelFor, markStarted, rewardText, syncGame, winGame,
   type Progress, type Reward,
 } from './game/progress'
-import { loadGame, loadPrefs, loadProgress, saveGame, savePrefs, saveProgress, type Prefs } from './storage'
+import {
+  loadGame, loadPrefs, loadProgress, makeBackup, restoreBackup, saveGame, savePrefs, saveProgress,
+  type Backup, type Prefs,
+} from './storage'
 import { CardBack, CardView } from './ui/CardView'
 import { Decor } from './ui/Decor'
 import { EASE, Flipper, flyCandy, flyToSlot, shake } from './ui/flip'
@@ -238,6 +241,42 @@ export default function App() {
 
   function equip(kind: ItemKind, id: string) {
     updatePrefs(kind === 'back' ? { back: id } : { bg: id })
+  }
+
+  /* ---------- 存档备份 ---------- */
+  async function exportBackup() {
+    saveGame(gameRef.current, history.current, elapsed.current)
+    const now = Date.now()
+    const d = new Date(now)
+    const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const file = new File([JSON.stringify(makeBackup(now))], `sleepyspider-backup-${day}.json`, { type: 'application/json' })
+    // 手机上弹系统分享菜单（可以存到"文件"、发给自己），电脑上直接下载
+    if (matchMedia('(pointer: coarse)').matches && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Sleepy Spider 存档' })
+      } catch (e) {
+        if ((e as DOMException).name === 'AbortError') return
+        download(file)
+      }
+    } else download(file)
+    updatePrefs({ lastBackup: now })
+    say('存档导出好啦')
+  }
+
+  function download(file: File) {
+    const url = URL.createObjectURL(file)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = file.name
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 4000)
+  }
+
+  function importBackup(b: Backup) {
+    restoreBackup(b)
+    window.location.reload()
   }
 
   function openGrowth(tab: GrowthTab) {
@@ -566,7 +605,15 @@ export default function App() {
         />
       )}
       {sheet === 'settings' && (
-        <SettingsSheet prefs={prefs} onChange={updatePrefs} onDress={() => openGrowth('dress')} onClose={() => setSheet(null)} />
+        <SettingsSheet
+          prefs={prefs}
+          onChange={updatePrefs}
+          onDress={() => openGrowth('dress')}
+          onExport={() => void exportBackup()}
+          onRestore={importBackup}
+          onError={say}
+          onClose={() => setSheet(null)}
+        />
       )}
       {sheet === 'growth' && (
         <GrowthSheet p={progress} prefs={prefs} initial={growthTab} onEquip={equip} onClose={() => setSheet(null)} />
