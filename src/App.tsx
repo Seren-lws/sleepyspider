@@ -3,9 +3,9 @@ import {
   bestTarget, canMove, collect, deal, dealsLeft, findCompleted, hasEmptyCol, hints, isRun, isWon,
   moveCards, newGame, runStart, undoTo, SETS, type Card, type Difficulty, type GameState, type Hint,
 } from './game/engine'
-import type { Item, ItemKind } from './game/catalog'
+import { isUnlocked, pickLevelupStyle, type Item, type ItemKind } from './game/catalog'
 import {
-  beginGame, collectSets, ensureDay, levelFor, markStarted, rewardText, syncGame, winGame,
+  beginGame, catchUp, collectSets, ensureDay, levelFor, markStarted, rewardText, syncGame, threshold, winGame,
   type Progress, type Reward,
 } from './game/progress'
 import {
@@ -16,7 +16,7 @@ import { CardBack, CardView } from './ui/CardView'
 import { Decor } from './ui/Decor'
 import { EASE, Flipper, flyCandy, flyToSlot, shake } from './ui/flip'
 import { fmtTime } from './ui/format'
-import { GiftOverlay } from './ui/Gift'
+import { GiftOverlay, type GiftShow } from './ui/Gift'
 import { GrowthSheet, type GrowthTab } from './ui/Growth'
 import {
   Bow, CROWN_PATH, Crown, GoldDefs, IconCards, IconHint, IconMoon, IconSettings, IconSun, IconUndo, Konpeito, Pip,
@@ -25,6 +25,17 @@ import { NewGameSheet, SettingsSheet } from './ui/Sheets'
 import { WinOverlay } from './ui/WinOverlay'
 
 type LevelReward = Extract<Reward, { kind: 'level' }>
+
+/** 升级奖励 → 要拆的礼物。新拿到的是升级动画的话，这次就用它来送 */
+const toShow = (r: LevelReward): GiftShow => ({
+  key: `lv${r.level}`,
+  style: r.item?.kind === 'levelup' ? r.item.id : pickLevelupStyle(r.level),
+  title: `升到 Lv.${r.level} 啦`,
+  items: r.item ? [r.item] : [],
+  bonus: r.bonus,
+})
+
+const PREVIEW_DONE: ('s' | 'h')[] = ['h', 's', 'h', 's', 'h', 's', 'h', 's']
 
 const isNightHour = (d = new Date()) => d.getHours() >= 21 || d.getHours() < 6
 
@@ -79,8 +90,15 @@ function boot() {
   const g = saved && !isWon(saved.game)
     ? saved
     : { game: newGame(prefs.difficulty), history: [] as GameState[], elapsed: 0 }
-  const progress = syncGame(ensureDay(loadProgress(now), now), g.game.seed, g.game.difficulty)
-  return { prefs, progress, ...g }
+  let progress = syncGame(ensureDay(loadProgress(now), now), g.game.seed, g.game.difficulty)
+  // 只在本地预览里有用：网址加 ?lv=17 就假装升到 17 级，方便试补发和新动画
+  if (import.meta.env.DEV) {
+    const lv = Number(new URLSearchParams(location.search).get('lv'))
+    if (lv > 1) progress = { ...progress, candy: threshold(lv) + 1, granted: undefined }
+  }
+  // 以前升级时还没做出来的礼物，这次打开先补发（拆完才记成"已发"）
+  const catchup = catchUp(progress).items
+  return { prefs, progress, catchup, ...g }
 }
 
 export default function App() {
@@ -94,14 +112,17 @@ export default function App() {
   const [growthTab, setGrowthTab] = useState<GrowthTab>('tasks')
   const [win, setWin] = useState(false)
   const [winRewards, setWinRewards] = useState<Reward[]>([])
-  const [gifts, setGifts] = useState<LevelReward[]>([])
+  const [gifts, setGifts] = useState<GiftShow[]>(() => init.catchup.length
+    ? [{ key: 'catchup', style: 'lu-gift', title: '补发礼物', items: init.catchup, bonus: 0, catchup: true }]
+    : [])
+  const [preview, setPreview] = useState<Item | null>(null)
   const [progress, setProgress] = useState<Progress>(init.progress)
   const [fresh, setFresh] = useState(-1)
   const [, setMinute] = useState(0)
 
   const progressRef = useRef(init.progress)
   const carry = useRef<Reward[]>([]) // 最后一串收齐时拿到的奖励，留到赢的面板里一起显示
-  const winGifts = useRef<LevelReward[]>([])
+  const winGifts = useRef<GiftShow[]>([])
   const nightRef = useRef(false)
   const candyRef = useRef<HTMLButtonElement>(null)
   const gameRef = useRef(init.game)
@@ -214,7 +235,7 @@ export default function App() {
       } else if (r.kind === 'level') lv.push(r)
       else say(rewardText(r), true)
     }
-    if (lv.length) window.setTimeout(() => setGifts((q) => [...q, ...lv]), 1300)
+    if (lv.length) window.setTimeout(() => setGifts((q) => [...q, ...lv.map(toShow)]), 1300)
   }
 
   function onWin(n: GameState) {
@@ -226,7 +247,7 @@ export default function App() {
     const all = [...carry.current, ...res.rewards]
     carry.current = []
     setWinRewards(all)
-    winGifts.current = all.filter((r): r is LevelReward => r.kind === 'level')
+    winGifts.current = all.filter((r): r is LevelReward => r.kind === 'level').map(toShow)
     window.setTimeout(() => { if (isWon(gameRef.current)) setWin(true) }, 1100)
   }
 
@@ -240,7 +261,15 @@ export default function App() {
   }
 
   function equip(kind: ItemKind, id: string) {
-    updatePrefs(kind === 'back' ? { back: id } : { bg: id })
+    if (kind === 'back') updatePrefs({ back: id })
+    else if (kind === 'bg') updatePrefs({ bg: id })
+    else if (kind === 'win') updatePrefs({ winAnim: id })
+  }
+
+  /** 拆完一份礼物；补发的那份拆完才记成"已经发过" */
+  function closeGift() {
+    if (gifts[0]?.catchup) applyProgress(catchUp(progressRef.current).p)
+    setGifts((q) => q.slice(1))
   }
 
   /* ---------- 存档备份 ---------- */
@@ -617,7 +646,7 @@ export default function App() {
         />
       )}
       {sheet === 'growth' && (
-        <GrowthSheet p={progress} prefs={prefs} initial={growthTab} onEquip={equip} onClose={() => setSheet(null)} />
+        <GrowthSheet p={progress} prefs={prefs} initial={growthTab} onEquip={equip} onPreview={setPreview} onClose={() => setSheet(null)} />
       )}
       {win && (
         <WinOverlay
@@ -626,18 +655,41 @@ export default function App() {
           time={fmtTime(elapsed.current)}
           moves={game.moves}
           rewards={winRewards}
+          style={isUnlocked(prefs.winAnim, levelFor(progress.candy)) ? prefs.winAnim : 'win-stars'}
           onAgain={() => closeWin(true)}
           onClose={() => closeWin(false)}
         />
       )}
-      {!win && gifts[0] && (
+      {!win && !preview && gifts[0] && (
         <GiftOverlay
-          key={gifts[0].level}
-          level={gifts[0].level}
-          item={gifts[0].item}
-          bonus={gifts[0].bonus}
-          onEquip={(item: Item) => { equip(item.kind, item.id); setGifts((q) => q.slice(1)) }}
-          onClose={() => setGifts((q) => q.slice(1))}
+          key={gifts[0].key}
+          show={gifts[0]}
+          onEquip={(item: Item) => { equip(item.kind, item.id); closeGift() }}
+          onDress={() => { closeGift(); openGrowth('dress') }}
+          onClose={closeGift}
+        />
+      )}
+      {preview?.kind === 'levelup' && (
+        <GiftOverlay
+          key={`pv-${preview.id}`}
+          show={{ key: 'pv', style: preview.id, title: preview.name, items: [preview], bonus: 0, preview: true }}
+          onEquip={() => {}}
+          onDress={() => {}}
+          onClose={() => setPreview(null)}
+        />
+      )}
+      {preview?.kind === 'win' && (
+        <WinOverlay
+          key={`pv-${preview.id}`}
+          done={PREVIEW_DONE}
+          score={0}
+          time=""
+          moves={0}
+          rewards={[]}
+          style={preview.id}
+          preview={preview.name}
+          onAgain={() => setPreview(null)}
+          onClose={() => setPreview(null)}
         />
       )}
     </div>

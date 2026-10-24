@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  beginGame, collectSets, dayKey, emptyProgress, ensureDay, levelFor, markStarted, pickTasks, syncGame,
+  beginGame, catchUp, collectSets, dayKey, emptyProgress, ensureDay, levelFor, markStarted, pickTasks, syncGame,
   threshold, winGame, TASKS, type Progress, type WinInfo,
 } from './progress'
 
@@ -72,10 +72,10 @@ describe('等级', () => {
   })
 
   it('没有礼物的等级送 20 颗金平糖', () => {
-    const p = { ...fresh(), candy: threshold(9) - 1 }
+    const p = { ...fresh(), candy: threshold(12) - 1 }
     const r = collectSets(p, 1, T0)
     const lv = r.rewards.find((x) => x.kind === 'level')
-    expect(lv).toMatchObject({ level: 9, item: null, bonus: 20 })
+    expect(lv).toMatchObject({ level: 12, item: null, bonus: 20 })
   })
 })
 
@@ -121,5 +121,27 @@ describe('战绩和连胜', () => {
     const p = markStarted(fresh())
     expect(syncGame(p, 1, 2)).toBe(p)
     expect(syncGame(p, 9, 2).cur).toMatchObject({ seed: 9, started: false })
+  })
+})
+
+describe('补发礼物', () => {
+  it('老存档在 17 级：9～17 级的新动画一次补发，第二次就没有了', () => {
+    const old = { ...fresh(), candy: threshold(17) + 5 }
+    delete old.granted
+    const r = catchUp(old)
+    expect(r.items.map((i) => i.level)).toEqual([9, 10, 11, 13, 14, 15, 17])
+    expect(r.p.granted).toBe(17)
+    expect(catchUp(r.p).items).toEqual([])
+  })
+
+  it('新玩家不会被补发 1 级的东西', () => {
+    expect(catchUp(fresh()).items).toEqual([])
+  })
+
+  it('正常升级以后就记为已经发过，不会再补发', () => {
+    const p = { ...fresh(), candy: threshold(9) - 1, granted: 8 }
+    const after = collectSets(p, 1, T0).p
+    expect(after.granted).toBe(9)
+    expect(catchUp(after).items).toEqual([])
   })
 })

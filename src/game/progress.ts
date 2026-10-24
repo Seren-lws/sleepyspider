@@ -1,5 +1,5 @@
 // 养成：金平糖、每日任务、成就、升级、战绩。只管数字，不碰界面
-import { itemAtLevel, type Item } from './catalog'
+import { ITEMS, itemAtLevel, type Item } from './catalog'
 import { mulberry32, type Difficulty } from './engine'
 
 export interface Stats {
@@ -39,6 +39,7 @@ export interface Progress {
   ach: Record<string, number> // 成就 id → 拿到的时间
   daily: Daily
   cur: CurrentGame | null
+  granted?: number // 礼物已经发到第几级（补发用）
 }
 
 export interface WinInfo {
@@ -227,7 +228,22 @@ function payout(q: Progress, rewards: Reward[]): Result {
     }
     level = now
   }
+  q.granted = Math.max(q.granted ?? 0, level)
   return { p: q, rewards }
+}
+
+/** 这次更新以前，礼物只排到了 8 级；之后那些级只送了糖 */
+const LEGACY_GRANTED = 8
+
+/**
+ * 补发：已经升过去、但当时礼物还没做出来的那些级，现在把东西补上。
+ * 返回要补发的东西（没有就是空的），并记下"已经发到第几级了"
+ */
+export function catchUp(p: Progress): { p: Progress; items: Item[] } {
+  const lv = levelFor(p.candy)
+  const from = p.granted ?? Math.min(lv, LEGACY_GRANTED)
+  if (from >= lv) return { p: p.granted === lv ? p : { ...p, granted: Math.max(from, lv) }, items: [] }
+  return { p: { ...p, granted: lv }, items: ITEMS.filter((i) => i.level > from && i.level <= lv) }
 }
 
 /** 收齐了几串（doneCount = 这一局一共收了几串）。撤销再收不会重复给 */

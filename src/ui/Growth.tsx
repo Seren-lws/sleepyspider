@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { ITEMS, KIND_NAME, itemAtLevel, type ItemKind } from '../game/catalog'
+import { ITEMS, KIND_NAME, itemAtLevel, type Item, type ItemKind } from '../game/catalog'
 import type { Difficulty } from '../game/engine'
 import { ACHS, CANDY, TASKS, levelFor, threshold, type Progress } from '../game/progress'
 import type { Prefs } from '../storage'
 import { fmtTime } from './format'
 import { IconCheck, IconLock, Konpeito, Medal } from './icons'
-import { BackPreview, BgSwatch } from './outfits'
+import { ItemTile } from './characters'
 import { Sheet } from './Sheets'
 
 export type GrowthTab = 'tasks' | 'ach' | 'stats' | 'dress'
@@ -113,34 +113,55 @@ function Stats({ p }: { p: Progress }) {
   )
 }
 
-function Dress({ level, prefs, onEquip }: { level: number; prefs: Prefs; onEquip: (kind: ItemKind, id: string) => void }) {
-  const section = (kind: ItemKind) => (
+function Dress({ level, prefs, onEquip, onPreview }: {
+  level: number
+  prefs: Prefs
+  onEquip: (kind: ItemKind, id: string) => void
+  onPreview: (item: Item) => void
+}) {
+  const chosen: Partial<Record<ItemKind, string>> = { back: prefs.back, bg: prefs.bg, win: prefs.winAnim }
+  const section = (kind: ItemKind, note?: string) => (
     <>
       <div className="row-label">{KIND_NAME[kind]}</div>
+      {note && <p className="note">{note}</p>}
       <div className={`dress-grid ${kind}`}>
         {ITEMS.filter((i) => i.kind === kind).map((i) => {
           const locked = i.level > level
-          const on = (kind === 'back' ? prefs.back : prefs.bg) === i.id
+          const on = chosen[kind] === i.id
+          // 升级动画没有"选"这回事，点了就是看一看
+          const tap = kind === 'levelup' ? () => onPreview(i) : () => onEquip(kind, i.id)
           return (
-            <button key={i.id} className={`dress${on ? ' on' : ''}${locked ? ' locked' : ''}`}
-              disabled={locked} onClick={() => onEquip(kind, i.id)}>
-              {kind === 'back' ? <BackPreview back={i.id} /> : <BgSwatch bg={i.id} />}
-              <span className="dress-name">{i.name}</span>
-              {locked && <span className="dress-lock"><IconLock />Lv.{i.level}</span>}
-            </button>
+            <div key={i.id} className="dress-wrap">
+              <button className={`dress${on ? ' on' : ''}${locked ? ' locked' : ''}`} disabled={locked} onClick={tap}>
+                <ItemTile item={i} />
+                <span className="dress-name">{i.name}</span>
+                {locked && <span className="dress-lock"><IconLock />Lv.{i.level}</span>}
+              </button>
+              {kind === 'win' && !locked && (
+                <button className="dress-play" onClick={() => onPreview(i)} aria-label={`看一看${i.name}`}>▶</button>
+              )}
+            </div>
           )
         })}
       </div>
     </>
   )
-  return <>{section('back')}{section('bg')}</>
+  return (
+    <>
+      {section('back')}
+      {section('bg')}
+      {section('win', '赢了以后播哪一个。点右上角的 ▶ 可以先看一看。')}
+      {section('levelup', '升级时会从解锁的里面随机挑一个。点一下就能看一看。')}
+    </>
+  )
 }
 
-export function GrowthSheet({ p, prefs, initial, onEquip, onClose }: {
+export function GrowthSheet({ p, prefs, initial, onEquip, onPreview, onClose }: {
   p: Progress
   prefs: Prefs
   initial: GrowthTab
   onEquip: (kind: ItemKind, id: string) => void
+  onPreview: (item: Item) => void
   onClose: () => void
 }) {
   const [tab, setTab] = useState<GrowthTab>(initial)
@@ -158,7 +179,7 @@ export function GrowthSheet({ p, prefs, initial, onEquip, onClose }: {
         {tab === 'tasks' && <Tasks p={p} />}
         {tab === 'ach' && <Achievements p={p} />}
         {tab === 'stats' && <Stats p={p} />}
-        {tab === 'dress' && <Dress level={levelFor(p.candy)} prefs={prefs} onEquip={onEquip} />}
+        {tab === 'dress' && <Dress level={levelFor(p.candy)} prefs={prefs} onEquip={onEquip} onPreview={onPreview} />}
       </div>
       <button className="btn text" onClick={onClose}>好了</button>
     </Sheet>

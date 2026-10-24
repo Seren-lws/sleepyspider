@@ -12,10 +12,11 @@ export interface Prefs {
   bg: string
   lastBackup?: number
   dealWithEmpty: boolean
+  winAnim: string
 }
 
 export const defaultPrefs: Prefs = {
-  theme: 'day', tapToMove: true, difficulty: 2, back: 'pink', bg: 'cream', dealWithEmpty: true,
+  theme: 'day', tapToMove: true, difficulty: 2, back: 'pink', bg: 'cream', dealWithEmpty: true, winAnim: 'win-stars',
 }
 
 const SAVE_KEY = 'sleepyspider:save:v1'
